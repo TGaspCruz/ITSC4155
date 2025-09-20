@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('./app');
+const app = require('../app');
 
 describe('Static file serving', () => {
   it('should serve index.html at root path', async () => {
