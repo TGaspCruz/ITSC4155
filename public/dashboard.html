@@ -4,8 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
     <h1>Dashboard</h1>
+    <div class="container">
+        <h2>Stock Market</h2>
+        <div class="input-group">
+            <input type="text" name="stock" id="stock" placeholder="Search stock name/symbol">
+            <button onclick="fetchStockData()">Search</button>
+        </div>
+        <div class="stockInfo">
+            <p class="companyName" id=""companyName>-</p>
+            <p class="stockPriceInfo">
+                <span class="stockPrice" id="stockPrice">-</span>
+                <span class="stockChange" id="stockChange">-</span>
+            </p>
+            <p class="stockDescription" id="stockDescription">-</p>
+        </div>
+        <div class="divTable">
+            <table>
+                <tr><th>Sector</th><td id="sector">-</td></tr>
+                <tr><th>Previous Close</th><td id="previousClose">-</td></tr>
+                <tr><th>Open</th><td id="stockOpen">-</td></tr>
+                <tr><th>High</th><td id="stockHigh">-</td></tr>
+                <tr><th>Low</th><td id="stockLow">-</td></tr>
+                <tr><th>Volume</th><td id="stockVolume">-</td></tr>
+            </table>
+        </div>
+        <div class="buttonGroup">
+            <button class="buyButton">Buy</button>
+            <button class="sellButton">Sell</button>
+        </div>
+    </div>
 </body>
 </html>

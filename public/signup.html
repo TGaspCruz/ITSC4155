@@ -9,7 +9,7 @@
 <body>
     <div>
         <h1>Signup</h1>
-        <form action="/register" method="POST">
+        <form action="/register" method="POST" id="signup-form">
             <label for="username">Username</label>
             <input type="text" name="username" id="username" required>
             <label for="email">Email</label>
@@ -18,8 +18,10 @@
             <input type="password" name="password" id="password" required>
             <button type="submit">Register</button>
             <button type="button" onclick="window.location.href='/'">Go Back</button>
+            <p id="signupMessage" style="margin-top: 12px; color: red;"></p>
         </form>
         <p><a href="index.html">Login</a></p>
     </div>
+    <script src="signupPage.js"></script>
 </body>
 </html>
