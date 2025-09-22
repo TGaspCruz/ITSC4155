@@ -15,7 +15,6 @@ div {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     width: 400px;
     text-align: center;
-    align-content: center;
 }
 
 h1 {
@@ -53,3 +52,4 @@ button {
 button:hover {
     background-color: lightblue;
 }
+

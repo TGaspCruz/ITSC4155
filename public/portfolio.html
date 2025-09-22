@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>portfolio</title>
+    <link rel="stylesheet" href="portfolio.css">
+</head>
+<body>
+    <header>
+        <h1 id="username">&#128188 Portfolio</h1>
+        <nav>
+            <a href="dashboard.html">Dashboard</a>
+            <button id="logoutBtn">Logout</button>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Available Funds</h2>
+            <p id="available-funds">$0.00</p>
+        </section>
+        <section>
+            <h2>Stock Holdings</h2>
+            <div>
+            <table id="holdings-table" border="1" cellpadding="6">
+                <thead>
+                    <tr>
+                        <th>Ticker</th>
+                        <th>Quantity</th>
+                        <th>Avg Price</th>
+                        <th>Market Value</th>
+                    </tr>
+                </thead>
+                <tbody id="holdings-body">
+                </tbody>
+            </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

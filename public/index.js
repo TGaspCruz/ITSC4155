@@ -2,6 +2,7 @@
 //     return variable;
 // }
 
+// const { set } = require("../app");
 let loginForm = document.getElementById("loginForm");
 let message = document.getElementById('loginMessage');
 
@@ -24,30 +25,16 @@ loginForm.addEventListener("submit", async function(event) {
             body: JSON.stringify(data)
         });
 
-        // Try to parse JSON if possible, otherwise fallback to text
-        let payload;
-        const contentType = response.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-            payload = await response.json();
-        } else {
-            payload = { message: await response.text() };
-        }
+        const payload = await response.json();
+
         console.log('Response payload:', payload);
         if (response.ok) {
-            // On success the server may request a redirect. If server returned a redirect URL in JSON, follow it.
+            // Successful login message and redirect to dashboard
             message.style.color = 'green';
             message.textContent = payload.message || 'Login successful';
-            if (payload.redirect) {
-                // small delay so user can see message
-                setTimeout(() => { window.location.href = payload.redirect; }, 600);
-            } else {
-                // if server used HTTP redirect instead of JSON, follow it manually
-                if (response.status === 200 && !payload.redirect) {
-                    // Best-effort: go to /dashboard
-                    setTimeout(() => { window.location.href = '/dashboard'; }, 600);
-                }
-            }
+            setTimeout(() => { window.location.href = payload.redirect || '/dashboard'; }, 600);
         } else {
+            // Display error message from server
             message.style.color = 'red';
             message.textContent = payload.message || `Error: ${response.status}`;
         }

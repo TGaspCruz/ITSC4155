@@ -1,88 +1,89 @@
 body {
-    background-color: #232931;
-    color: white;
-    text-align: center;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: rgb(36, 33, 33)
 }
 
-.container {
-    max-width: 800px;
-    margin: auto;
+header {
+  background-color: #300ec7;
+  color: white;
+  padding: 1em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-input, button {
-    padding: 10px;
-    margin: 10px;
-    font-size: 16px;
+nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 1em;
+  font-size: 20px;
+}
+
+main {
+  padding: 2em;
+}
+
+.dashboard {
+  display: flex;
+  gap: 2em;
+  flex-wrap: wrap;
+  min-height: 80vh;
+}
+
+.left-column, .right-column {
+  flex: 1;
+  min-width: 300px;
+  background-color: white;
+  padding: 1em;
+  border-radius: 8px;
+}
+
+#stock-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+#stock-list li {
+  padding: 0.5em 0;
+  border-bottom: 1px solid #ddd;
+}
+
+input[type="text"], input[type="number"] {
+  width: auto;
+  padding: 0.5em;
+  margin-top: 0.5em;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-bottom: 5px;
 }
 
 button {
-    cursor: pointer;
-    background-color: orange;
-    color: white;
-}
-
-.companyName {
-    font-weight: bold;
-    text-align: justify;
-    margin-bottom: 10px;
-}
-
-.stockPriceInfo {
-    text-align: justify;
-}
-
-.stockPrice {
-    font-weight: bold;
-    color: white;
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 5px;
-    margin-top: 5px;
-}
-
-.stockChange {
-    font-weight: bold;
-    margin-left: 10px;
-}
-
-.stockDescription {
-    color: white;
-    margin-top: 10px;
-    text-align: justify;
-}
-
-.divTable {
-    justify-content: center;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    box-shadow: 0 0 5px rgba(0,0,0,0.1);
-}
-
-th, td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
-    color: white;
-}
-
-th {
-    background: #232931;
-}
-
-.buttonGroup {
-    margin-top: 20px;
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  margin-right: 0.5em;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .buyButton {
-    width: 100px;
     background-color: green;
 }
 
 .sellButton {
-    width: 100px;
     background-color: red;
+}
+
+button:hover {
+  background-color: lightblue;
+}
+
+.form-popup {
+  display: none;
+  margin-top: 1em;
+  background-color: #e7f5ec;
+  padding: 1em;
+  border-radius: 8px;
 }
