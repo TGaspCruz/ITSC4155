@@ -18,13 +18,13 @@
     <div class="dashboard">
       <section class="left-column">
         <h2>Top Stock Gainers</h2>
-        <ul id="gainers-list"></ul>
+        <table id="TopGainerTable"></table>
 
         <h2>Top Stock Losers</h2>
-        <ul id="losers-list"></ul>
+        <table id="TopLosersTable"></table>
 
         <h2>Most Actively Traded Stocks</h2>
-        <ul id="active-list"></ul>
+        <table id="TopActivelyTraded"></table>
       </section>
       <section class="right-column">
         <h2>Trade Center</h2>
@@ -78,6 +78,48 @@
         window.location.href = '/';
       }
     });
+
+    async function fetchStockData() {
+        try {
+            const response = await fetch('/api/stockList');
+            const data = await response.json();
+            
+            const gainersTable = document.getElementById('TopGainerTable');
+            const losersTable = document.getElementById('TopLosersTable');
+            const activeTable = document.getElementById('TopActivelyTraded');
+
+            // Function to populate a table with stock data
+            function populateTable(stocks, table) {
+                let html = '<tr><th>Ticker</th><th>Price</th><th>Change</th><th>Change%</th><th>Volume</th></tr>';
+                stocks.forEach(stock => {
+                    html += `<tr>
+                                <td>${stock.ticker}</td>
+                                <td>$${Number(stock.price).toFixed(2)}</td>
+                                <td style="color:${Number(stock.change_amount).toFixed(2) >= 0 ? 'green' : 'red'};">
+                                    ${Number(stock.change_amount).toFixed(2) >= 0 ? '+' : ''}${Number(stock.change_amount).toFixed(2)}
+                                </td>
+                                <td style="color:${Number(stock.change_amount).toFixed(2) >= 0 ? 'green' : 'red'};">
+                                    ${stock.change_percentage}
+                                <td>${stock.volume}</td>
+                             </tr>`;
+                });
+                table.innerHTML = html;
+            }
+            const top_gainersArray = data.stockList.top_gainers;
+            const top_losersArray = data.stockList.top_losers;
+            const most_actively_tradedArray = data.stockList.most_actively_traded;
+
+            populateTable(top_gainersArray, gainersTable);
+            populateTable(top_losersArray, losersTable);
+            populateTable(most_actively_tradedArray, activeTable);
+
+        } catch (error) {
+            console.error('Error fetching stock data:', error);
+        }
+    }
+
+    // Fetch stock data on page load
+    window.onload = fetchStockData;
 
   </script>
 
