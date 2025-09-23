@@ -1,5 +1,9 @@
-npm install express express-session mongoose
+npm install
 
-npm install --save-dev nodemon jest supertest
+create .env file
 
-npm run dev (start server)
+Get Alpha Vantage free API KEY
+
+add PORT, SECRET_KEY, and API_KEY values to .env file
+
+
