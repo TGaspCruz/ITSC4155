@@ -3,8 +3,10 @@
 // }
 
 // const { set } = require("../app");
+
+// login form submission handler
 let loginForm = document.getElementById("loginForm");
-let message = document.getElementById('loginMessage');
+let loginMessage = document.getElementById('loginMessage');
 
 
 loginForm.addEventListener("submit", async function(event) {
@@ -29,19 +31,19 @@ loginForm.addEventListener("submit", async function(event) {
 
         console.log('Response payload:', payload);
         if (response.ok) {
-            // Successful login message and redirect to dashboard
-            message.style.color = 'green';
-            message.textContent = payload.message || 'Login successful';
+            // Successful login loginMessageand redirect to dashboard
+            loginMessage.style.color = 'green';
+            loginMessage.textContent = payload.message|| 'Login successful';
             setTimeout(() => { window.location.href = payload.redirect || '/dashboard'; }, 600);
         } else {
-            // Display error message from server
-            message.style.color = 'red';
-            message.textContent = payload.message || `Error: ${response.status}`;
+            // Display error loginMessagefrom server
+            loginMessage.style.color = 'red';
+            loginMessage.textContent = payload.message|| `Error: ${response.status}`;
         }
     } catch (err) {
         console.error('Fetch error', err);
-        message.style.color = 'red';
-        message.textContent = 'Network error. Please try again.';
+        loginMessage.style.color = 'red';
+        loginMessage.textContent = 'Network error. Please try again.';
     }
 });
 

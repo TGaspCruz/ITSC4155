@@ -1,5 +1,5 @@
-let signupForm = document.getElementById("signup-form");
-let message = document.getElementById('signupMessage');
+let signupForm = document.getElementById("signupForm");
+let signupMessage = document.getElementById('signupMessage');
 
 
 signupForm.addEventListener("submit", async function(event) {
@@ -25,19 +25,19 @@ signupForm.addEventListener("submit", async function(event) {
 
         console.log('Response payload:', payload);
         if (response.ok) {
-            // Successful registration message and redirect to dashboard
-            message.style.color = 'green';
-            message.textContent = payload.message || 'Signup successful';
+            // Successful registration signupMessage and redirect to dashboard
+            signupMessage.style.color = 'green';
+            signupMessage.textContent = payload.message || 'Signup successful';
             setTimeout(() => { window.location.href = payload.redirect; }, 600);
         
         } else {
-            // Display error message from server
-            message.style.color = 'red';
-            message.textContent = payload.message || `Error: ${response.status}`;
+            // Display error signupMessage from server
+            signupMessage.style.color = 'red';
+            signupMessage.textContent = payload.message || `Error: ${response.status}`;
         }
     } catch (err) {
         console.error('Fetch error', err);
-        message.style.color = 'red';
-        message.textContent = 'Network error. Please try again.';
+        signupMessage.style.color = 'red';
+        signupMessage.textContent = 'Network error. Please try again.';
     }
 });

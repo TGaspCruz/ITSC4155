@@ -17,6 +17,14 @@ div {
     text-align: center;
 }
 
+#loginForm, #signupForm {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    text-align: left;
+}
+
 h1 {
     margin-bottom: 1rem;
     color: blue;
@@ -28,7 +36,6 @@ label {
 }
 
 input:not([type="submit"]) {
-    width: 100%;
     padding: 0.6em;
     margin-bottom: 1rem;
     margin-top: 1rem;
@@ -47,9 +54,22 @@ button {
     padding-left: 1em;
     padding-right: 1em;
     border-radius: 5px;
+    margin-top: 1em;
 }
 
 button:hover {
     background-color: lightblue;
 }
 
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#loginMessage, #signupMessage {
+    margin-top: 12px;
+    text-align: center;
+}

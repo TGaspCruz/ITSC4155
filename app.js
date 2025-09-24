@@ -37,9 +37,9 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/register', (req, res) => {
-    res.sendFile(__dirname + '/public/register/register.html');
-});
+// app.get('/register', (req, res) => {
+//     res.sendFile(__dirname + '/public/register/register.html');
+// });
 
 app.get('/dashboard', (req, res) => {
     if (!req.session.user) {

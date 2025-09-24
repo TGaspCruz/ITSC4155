@@ -9,18 +9,17 @@
 <body>
     <div>
         <h1>Signup</h1>
-        <form action="/register" method="POST" id="signup-form">
+        <form action="/register" method="POST" id="signupForm">
             <label for="username">Username</label>
-            <input type="text" name="username" id="username" placeholder="enter username" required>
+            <input type="text" name="username" id="username" placeholder="username" required>
             <label for="email">Email</label>
-            <input type="email" name="email" id="email" placeholder="enter email" required>
+            <input type="email" name="email" id="email" placeholder="email" required>
             <label for="password">Password</label>
-            <input type="password" name="password" id="password" placeholder="enter password" required>
+            <input type="password" name="password" id="password" placeholder="password" required , minlength="8" maxlength="12">
             <button type="submit">Register</button>
-            <button type="button" onclick="window.location.href='/'">Go Back</button>
-            <p id="signupMessage" style="margin-top: 12px; color: red;"></p>
+            <p id="signupMessage"></p>
         </form>
-        <p><a href="index.html">Login</a></p>
+        <p>Already have an account? <a href="index.html">Login</a></p>
     </div>
     <script src="signupPage.js"></script>
 </body>
