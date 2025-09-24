@@ -21,13 +21,13 @@ app.use(session({
 }));
 
 // Block direct static access to dashboard.html when not logged in
-// app.use((req, res, next) => {
-//     // If a client requests /dashboard.html directly and there's no session user, redirect to login
-//     if (req.path === '/dashboard.html' && (!req.session || !req.session.user)) {
-//         return res.redirect('/');
-//     }
-//     next();
-// });
+app.use((req, res, next) => {
+    // If a client requests /dashboard.html directly and there's no session user, redirect to login
+    if (req.path === '/dashboard.html' && (!req.session || !req.session.user)) {
+        return res.redirect('/');
+    }
+    next();
+});
 
 // Serve static files after session middleware so the middleware above can protect specific files
 app.use(express.static('public'));
@@ -52,12 +52,21 @@ app.get('/dashboard', (req, res) => {
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        // Use findOne to avoid getting an array and reassigning const
-        const user = await User.findOne({ email: email, password: password });
+    
+        // checks for both email and password to match and if one or the other is wrong, it will send a message for which one is wrong
+        const user = await User.findOne({ email: email });
         if (!user) {
-            return res.status(401).json({ success: false, message: 'Invalid email or password' });
+            return res.status(401).json({ success: false, message: 'Email not associated with account' });
+        }
+        else if (user.password !== password) {
+            return res.status(401).json({ success: false, message: 'Incorrect password' });
         }
         req.session.user = {username: user.username, email: user.email};
+        // const user = await User.findOne({ email: email, password: password });
+        // if (!user) {
+        //     return res.status(401).json({ success: false, message: 'Email not associated with account or incorrect password' });
+        // }
+        // req.session.user = {username: user.username, email: user.email};
         return res.status(200).json({ success: true, message: 'Login successful', redirect: '/dashboard' });
     } catch (error) {
         console.error('Error in /login:', error);
@@ -82,7 +91,7 @@ app.post('/register', (req, res) => {
 
     // password length check
     if (password.length < 8) {
-        return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+        return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long' });
     }
 
     const newUser = new User({ username, email, password, portfolio: { availableFunds: 1000, stocks: [] } });
@@ -97,7 +106,7 @@ app.post('/register', (req, res) => {
             console.error('Error in /register:', err);
             // Duplicate key (unique email) error from Mongo
             if (err && err.code === 11000) {
-                return res.status(409).json({ success: false, message: 'Email already in use' });
+                return res.status(409).json({ success: false, message: 'Email already registered. Please log in instead' });
             }
             // Validation errors from mongoose
             if (err && err.name === 'ValidationError') {
@@ -124,6 +133,23 @@ app.get('/api/stockList', async (req, res) => {
 });
 
 
+// Return the logged-in user's info and portfolio
+app.get('/api/user', async (req, res) => {
+    try {
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({ success: false, message: 'Not logged in' });
+        }
+
+        const user = await User.findOne({ username: req.session.user.username, email: req.session.user.email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        return res.json({ success: true, username: user.username, email: user.email, portfolio: user.portfolio });
+    } catch (err) {
+        console.error('Error in /api/user:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching user data', detail: String(err) });
+    }
+});
 // Logout route - destroys the session
 app.post('/logout', (req, res) => {
     req.session.destroy(err => {

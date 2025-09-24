@@ -36,3 +36,13 @@ table {
     color: black;
 }
 
+button {
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  margin-right: 0.5em;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
