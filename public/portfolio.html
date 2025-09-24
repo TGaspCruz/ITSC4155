@@ -17,7 +17,7 @@
     <main>
         <section>
             <h2>Available Funds</h2>
-            <p id="available-funds">$0.00</p>
+            <p id="available-funds"></p>
         </section>
         <section>
             <h2>Stock Holdings</h2>
@@ -38,4 +38,56 @@
         </section>
     </main>
 </body>
+
+<script>
+
+    
+    
+    
+    async function getFunds() {
+  
+  
+  
+  const res = await fetch("/api/getFunds");
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById("available-funds").textContent = data.availableFunds;
+    
+  } else {
+    console.error("Failed to fetch funds:", data.message);
+  }
+}
+
+async function getStocks() {
+  const res = await fetch("/api/getStocks");
+  const data = await res.json();
+  if (data.success) {
+    const tbody = document.getElementById("holdings-body");
+    tbody.innerHTML = ""; // Clear existing rows if any
+
+    data.stocks.forEach(stock => {
+      const marketValue = (stock.quantity * stock.avgPrice).toFixed(2);
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${stock.ticker}</td>
+        <td>${stock.quantity}</td>
+        <td>${stock.avgPrice.toFixed(2)}</td>
+        <td>${marketValue}</td>
+      `;
+
+      tbody.appendChild(row);
+    });
+  } else {
+    console.error("Failed to fetch stocks:", data.message);
+  }
+}
+
+
+window.addEventListener("load", () => {
+  getFunds();
+  getStocks();
+});
+
+</script>
 </html>

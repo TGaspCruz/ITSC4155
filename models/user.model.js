@@ -1,40 +1,37 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const UserSchema = mongoose.Schema(
-    {
-        username: {
-            type: String,
-            required: [true, "Please enter username"],
-        },
+const UserSchema = mongoose.Schema({
+  username: {
+    type: String,
+    required: [true, "Please enter username"],
+  },
 
-        email: {
-            type: String,
-            required: [true, "Please enter email"],
-            unique: true,
-            match: [/.+@.+\..+/, 'Please enter a valid email address']
-        },
+  email: {
+    type: String,
+    required: [true, "Please enter email"],
+    unique: true,
+    match: [/.+@.+\..+/, "Please enter a valid email address"],
+  },
 
-        password: {
-            type: String,
-            required: [true, "Please enter password"],
-            minlength: [8, 'Password must be at least 8 characters']
-        }
-        ,
-        portfolio: {
-            availableFunds: {
-                type: Number,
-                default: 0,
-            },
-            stocks: [
-                {
-                    ticker: { type: String, required: true },
-                    quantity: { type: Number, required: true, min: 0 },
-                    avgPrice: { type: Number, required: true, min: 0 }
-                }
-            ]
-        }
-    }
-);
+  password: {
+    type: String,
+    required: [true, "Please enter password"],
+    minlength: [8, "Password must be at least 8 characters"],
+  },
+  portfolio: {
+    availableFunds: {
+      type: Number,
+      default: 1000,
+    },
+    stocks: [
+      {
+        ticker: { type: String, required: true },
+        quantity: { type: Number, required: true, min: 0 },
+        avgPrice: { type: Number, required: true, min: 0 },
+      },
+    ],
+  },
+});
 
 const User = mongoose.model("User", UserSchema);
 
