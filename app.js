@@ -173,7 +173,6 @@ app.post("/logout", (req, res) => {
 //buy stock request. when the user clicks the confirm button to buy stock, this is called.
 
 app.post("/api/buyStock", async (req, res) => {
-  // Fixed missing slash
   if (!req.session.user) return res.status(401).json({ success: false }); //if not user, throw 401 error
 
   const { ticker, price, quantity } = req.body; // variables passed in the html post form body
@@ -188,6 +187,28 @@ app.post("/api/buyStock", async (req, res) => {
 
   user.portfolio.availableFunds -= totalCost; //deduct funds
   user.portfolio.stocks.push({ ticker, quantity, avgPrice: price }); //add stock to the users owned stocks array
+  await user.save(); //save
+  res.json({ success: true }); //return success
+});
+
+app.post("/api/sellStock", async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ success: false }); //if not user, throw 401 error
+
+  const { ticker, price, quantity } = req.body; // variables passed in the html post form body
+
+  const user = await User.findOne({ email: req.session.user.email }); // find the matching users email
+
+  const totalCost = price * quantity; //calculate the cost of the purchased stock
+
+  if (user.portfolio.availableFunds < totalCost) {
+    return res.status(400).json({ success: false });
+  } // verify user has enough funds
+
+  user.portfolio.availableFunds += totalCost; //add funds
+  user.portfolio.stocks = user.portfolio.stocks.filter(
+    (stock) => !(stock.ticker === ticker && stock.avgPrice === price)
+  );
+  //delete stock to the users owned stocks array
   await user.save(); //save
   res.json({ success: true }); //return success
 });

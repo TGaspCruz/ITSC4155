@@ -46,7 +46,18 @@
               <input type="hidden" id="hiddenTicker" name="ticker" />
               <input type="hidden" id="hiddenPrice" name="price" />
 
-              <button id="confirmBtn" type="submit">Buy</button>
+              <button id="buyBtn" type="submit">Buy</button>
+            </form>
+
+            <form action="/api/sellStock" method="POST">
+              <label for="quantity">Quantity:</label>
+              <input type="number" id="quantity" name="quantity" required />
+
+              <!-- Hidden inputs to include ticker and price in the POST -->
+              <input type="hidden" id="hiddenTicker2" name="ticker" />
+              <input type="hidden" id="hiddenPrice2" name="price" />
+
+              <button id="sellBtn" type="submit">Sell</button>
             </form>
           </div>
         </section>
@@ -523,6 +534,10 @@
               document.getElementById("hiddenPrice").value =
                 topGainers[i].price;
 
+              document.getElementById("hiddenTicker2").value = tickerInput;
+              document.getElementById("hiddenPrice2").value =
+                topGainers[i].price;
+
               break; // Stop the loop once found
             }
           }
@@ -555,15 +570,26 @@
           }
         });
 
-      const confirmBtn = document.getElementById("confirmBtn");
+      const buyBtn = document.getElementById("buyBtn");
 
-      confirmBtn.addEventListener("click", function () {
+      buyBtn.addEventListener("click", function () {
         const amount = document.getElementById("quantity").value;
         let searchedTickerPrice2 = document.getElementById(
           "searchedTickerPrice"
         );
         const num = parseFloat(searchedTickerPrice2.textContent) * amount;
         alert("Bought $" + num + " of stock in _______");
+      });
+
+      const sellBtn = document.getElementById("sellButton");
+
+      sellBtn.addEventListener("click", function () {
+        const amount = document.getElementById("quantity").value;
+        let searchedTickerPrice3 = document.getElementById(
+          "searchedTickerPrice"
+        );
+        const num = parseFloat(searchedTickerPrice3.textContent) * amount;
+        alert("Sold $" + num + " of stock in _______");
       });
 
       document.addEventListener("DOMContentLoaded", () => {
@@ -596,15 +622,12 @@
           });
         }
 
-        // Confirm button event listener only if confirmBtn exists
-        const confirmBtn = document.getElementById("confirmBtn");
-        if (confirmBtn) {
-          confirmBtn.addEventListener("click", function () {
+        const buyBtn = document.getElementById("buyBtn");
+        if (buyBtn) {
+          buyBtn.addEventListener("click", function () {
             const amount = document.getElementById("quantity").value; //how many shares they want to buy
-            const searchedTickerPrice2 = document.getElementById(
-              "searchedTickerPrice"
-            );
-            const num = parseFloat(searchedTickerPrice2.textContent) * amount; // the total price (share price * shares)
+
+            const num = parseFloat(searchedTickerPrice.textContent) * amount; // the total price (share price * shares)
           });
         }
       });

@@ -63,7 +63,7 @@ async function getStocks() {
   const data = await res.json();
   if (data.success) {
     const tbody = document.getElementById("holdings-body");
-    tbody.innerHTML = ""; // Clear existing rows if any
+    tbody.innerHTML = ""; 
 
     data.stocks.forEach(stock => {
       const marketValue = (stock.quantity * stock.avgPrice).toFixed(2);
