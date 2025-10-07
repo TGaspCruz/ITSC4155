@@ -9,6 +9,35 @@
   <body>
     <header>
       <h1>&#128200; Stock Dashboard</h1>
+
+      <h1 id="portfolio-value">Portfolio Value: $0</h1>
+
+      <p id="invested"></p>
+
+      <script></script>
+      <br />
+      <p id="available-funds"></p>
+      <script>
+        let portfolioValue = 0;
+
+        let invested = 0;
+
+        window.addEventListener("load", () => {
+          getStocks();
+        });
+
+        async function getStocks() {
+          const res = await fetch("/api/getStocks");
+          const data = await res.json();
+          if (data.success) {
+            data.stocks.forEach((stock) => {
+              portfolioValue += stock.quantity * stock.avgPrice;
+              document.getElementById("portfolio-value").textContent =
+                "Portfolio Value: $" + portfolioValue.toFixed(2);
+            });
+          }
+        }
+      </script>
       <nav>
         <a href="portfolio.html">Portfolio</a>
         <button id="logoutBtn">Logout</button>
@@ -17,22 +46,23 @@
     <main>
       <div class="dashboard">
         <section class="left-column">
-          <h2>Top Stock Gainers</h2>
+          <h2>Top Stock Gainers <b>AGMH ⬆️ %57</b></h2>
           <ul id="gainers-list"></ul>
 
-          <h2>Top Stock Losers</h2>
+          <h2>Top Stock Losers <b>PTL ⬇️ %57</b></h2>
           <ul id="losers-list"></ul>
 
-          <h2>Most Actively Traded Stocks</h2>
+          <h2>Most Actively Traded Stocks <b> ⚡NVDA </b></h2>
           <ul id="active-list"></ul>
+          <canvas id="priceChart" width="400" height="100"></canvas>
         </section>
         <section class="right-column">
           <h2>Trade Center</h2>
+
           <input type="text" id="ticker" placeholder="Enter stock ticker" />
 
           <button id="searchBtn">Search</button>
           <button id="buyButton" class="buyButton">Buy</button>
-          <button id="sellButton" class="sellButton">Sell</button>
 
           <p id="searchedTickerPrice"></p>
           <div id="trade-form" class="form-popup">
@@ -42,31 +72,41 @@
               <label for="quantity">Quantity:</label>
               <input type="number" id="quantity" name="quantity" required />
 
+              <p id="available-funds-buy">Available funds:</p>
+              <script>
+                async function getFunds() {
+                  const res = await fetch("/api/getFunds");
+                  const data = await res.json();
+                  if (data.success) {
+                    document.getElementById("available-funds-buy").textContent =
+                      "Available funds: " + data.availableFunds;
+
+                    invested = 1000 - data.availableFunds;
+                    document.getElementById("invested").textContent =
+                      "Invested " + "$" + invested.toFixed(2);
+                  } else {
+                    console.error("Failed to fetch funds:", data.message);
+                  }
+                }
+
+                getFunds();
+                setInterval(getFunds, 2000);
+              </script>
+
               <!-- Hidden inputs to include ticker and price in the POST -->
               <input type="hidden" id="hiddenTicker" name="ticker" />
               <input type="hidden" id="hiddenPrice" name="price" />
 
               <button id="buyBtn" type="submit">Buy</button>
             </form>
-
-            <form action="/api/sellStock" method="POST">
-              <label for="quantity">Quantity:</label>
-              <input type="number" id="quantity" name="quantity" required />
-
-              <!-- Hidden inputs to include ticker and price in the POST -->
-              <input type="hidden" id="hiddenTicker2" name="ticker" />
-              <input type="hidden" id="hiddenPrice2" name="price" />
-
-              <button id="sellBtn" type="submit">Sell</button>
-            </form>
           </div>
         </section>
       </div>
+      <canvas id="priceChart" width="400" height="100"></canvas>
     </main>
 
     <script>
       document.getElementById("buyButton").style.display = "none";
-      document.getElementById("sellButton").style.display = "none";
 
       // Basic search (Requires further implementation)
       async function searchStock() {
@@ -527,15 +567,10 @@
               searchedTickerPrice.textContent = topGainers[i].price;
 
               document.getElementById("buyButton").style.display = "block";
-              document.getElementById("sellButton").style.display = "block";
 
               // Set hidden input values for form submission
               document.getElementById("hiddenTicker").value = tickerInput;
               document.getElementById("hiddenPrice").value =
-                topGainers[i].price;
-
-              document.getElementById("hiddenTicker2").value = tickerInput;
-              document.getElementById("hiddenPrice2").value =
                 topGainers[i].price;
 
               break; // Stop the loop once found
@@ -578,18 +613,7 @@
           "searchedTickerPrice"
         );
         const num = parseFloat(searchedTickerPrice2.textContent) * amount;
-        alert("Bought $" + num + " of stock in _______");
-      });
-
-      const sellBtn = document.getElementById("sellButton");
-
-      sellBtn.addEventListener("click", function () {
-        const amount = document.getElementById("quantity").value;
-        let searchedTickerPrice3 = document.getElementById(
-          "searchedTickerPrice"
-        );
-        const num = parseFloat(searchedTickerPrice3.textContent) * amount;
-        alert("Sold $" + num + " of stock in _______");
+        alert("Bought $" + num + " of stock in" + tickerInput);
       });
 
       document.addEventListener("DOMContentLoaded", () => {
@@ -603,12 +627,6 @@
           buyButton.addEventListener("click", () => showForm("buy"));
         }
 
-        const sellButton = document.getElementById("sellButton");
-        if (sellButton) {
-          sellButton.addEventListener("click", () => showForm("sell"));
-        }
-
-        // Add existing logout functionality
         const logoutBtn = document.getElementById("logoutBtn");
         if (logoutBtn) {
           logoutBtn.addEventListener("click", async () => {
@@ -624,13 +642,100 @@
 
         const buyBtn = document.getElementById("buyBtn");
         if (buyBtn) {
-          buyBtn.addEventListener("click", function () {
+          buyBtn.addEventListener("click", async function () {
             const amount = document.getElementById("quantity").value; //how many shares they want to buy
 
             const num = parseFloat(searchedTickerPrice.textContent) * amount; // the total price (share price * shares)
+
+            const data = await getFunds();
+
+            if (data.availableFunds < num) {
+              alert("Not enough money");
+            }
+
+            invested += num;
           });
         }
       });
+
+      async function simulateStockUpdates() {
+        portfolioValue = 0;
+        const res = await fetch("/api/getStocks");
+        const data = await res.json();
+        if (data.success) {
+          data.stocks.forEach((stock) => {
+            stock.avgPrice += Math.random() - 0.5; // Random walk
+            console.log(`Updated ${stock.ticker} to ${stock.avgPrice}`);
+          });
+          data.stocks.forEach((stock) => {
+            portfolioValue += stock.quantity * stock.avgPrice;
+
+            fetch("/api/updatePrice", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ticker: stock._id,
+                price: stock.avgPrice.toFixed(2),
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log(data);
+              });
+
+            if (portfolioValue > invested) {
+              document.getElementById("portfolio-value").textContent =
+                "Portfolio Value: $" +
+                portfolioValue.toFixed(2) +
+                "🤑" +
+                (portfolioValue / invested).toFixed(2) +
+                "%";
+            } else
+              document.getElementById("portfolio-value").textContent =
+                "Portfolio Value: $" +
+                portfolioValue.toFixed(2) +
+                "😭" +
+                (portfolioValue / invested).toFixed(2) +
+                "%";
+          });
+        }
+      }
+
+      setInterval(simulateStockUpdates, 1000); // Update every 5 seconds
+    </script>
+
+    <script>
+      const canvas = document.getElementById("priceChart");
+      const ctx = canvas.getContext("2d");
+
+      let avgPrice = portfolioValue;
+      let prices = [avgPrice];
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - avgPrice);
+        for (let i = 0; i < prices.length; i++) {
+          ctx.lineTo(i * 4, canvas.height - prices[i]);
+        }
+        ctx.lineWidth = 5; // Line thickness 5px
+        ctx.strokeStyle = "green"; // Blue color line
+        ctx.lineCap = "round"; // Rounded line endpoints
+        ctx.lineJoin = "round"; // Rounded corners between lines
+
+        ctx.stroke();
+      }
+
+      function update() {
+        avgPrice = portfolioValue / 3;
+        prices.push(avgPrice);
+        if (prices.length > 100) prices.shift();
+        draw();
+      }
+
+      setInterval(update, 100);
     </script>
   </body>
 </html>

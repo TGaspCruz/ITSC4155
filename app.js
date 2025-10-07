@@ -194,23 +194,28 @@ app.post("/api/buyStock", async (req, res) => {
 app.post("/api/sellStock", async (req, res) => {
   if (!req.session.user) return res.status(401).json({ success: false }); //if not user, throw 401 error
 
-  const { ticker, price, quantity } = req.body; // variables passed in the html post form body
+  const stockId = req.body.ticker;
 
-  const user = await User.findOne({ email: req.session.user.email }); // find the matching users email
+  const totalCost = req.body.price * req.body.quantity;
 
-  const totalCost = price * quantity; //calculate the cost of the purchased stock
+  const user = await User.findOne({ email: req.session.user.email });
 
-  if (user.portfolio.availableFunds < totalCost) {
-    return res.status(400).json({ success: false });
-  } // verify user has enough funds
+  if (!user)
+    return res.status(404).json({ success: false, message: "User not found" });
+  if (!user.portfolio.stocks)
+    return res
+      .status(400)
+      .json({ success: false, message: "No stocks to sell" });
 
-  user.portfolio.availableFunds += totalCost; //add funds
-  user.portfolio.stocks = user.portfolio.stocks.filter(
-    (stock) => !(stock.ticker === ticker && stock.avgPrice === price)
-  );
-  //delete stock to the users owned stocks array
-  await user.save(); //save
-  res.json({ success: true }); //return success
+  user.portfolio.stocks = user.portfolio.stocks.filter((stock) => {
+    return stock._id.toString() !== stockId;
+  });
+
+  user.portfolio.availableFunds += totalCost; //add the funds
+
+  await user.save();
+
+  res.json({ success: true });
 });
 
 module.exports = app;
@@ -257,4 +262,11 @@ app.get("/api/getStocks", async (req, res) => {
     console.error("Error fetching stocks:", err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
+});
+
+app.get("/api/updatePrice", async (req, res) => {
+  const stockId = req.body.ticker;
+  const newPrice = req.body.price;
+
+  res.json({ success: true });
 });
