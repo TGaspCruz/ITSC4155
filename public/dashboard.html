@@ -102,7 +102,7 @@
           </div>
         </section>
       </div>
-      <canvas id="priceChart" width="400" height="100"></canvas>
+      <canvas id="priceChart" width="500" height="100"></canvas>
     </main>
 
     <script>
@@ -676,7 +676,7 @@
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                ticker: stock._id,
+                ticker: stock.ticker,
                 price: stock.avgPrice.toFixed(2),
               }),
             })
@@ -720,7 +720,7 @@
         for (let i = 0; i < prices.length; i++) {
           ctx.lineTo(i * 4, canvas.height - prices[i]);
         }
-        ctx.lineWidth = 5; // Line thickness 5px
+        ctx.lineWidth = 1; // Line thickness 5px
         ctx.strokeStyle = "green"; // Blue color line
         ctx.lineCap = "round"; // Rounded line endpoints
         ctx.lineJoin = "round"; // Rounded corners between lines

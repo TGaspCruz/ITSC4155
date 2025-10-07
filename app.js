@@ -264,9 +264,20 @@ app.get("/api/getStocks", async (req, res) => {
   }
 });
 
-app.get("/api/updatePrice", async (req, res) => {
+app.post("/api/updatePrice", async (req, res) => {
   const stockId = req.body.ticker;
   const newPrice = req.body.price;
 
-  res.json({ success: true });
+  parseFloat(newPrice);
+  const user = await User.findOne({ email: req.session.user.email });
+
+  const stockToUpdate = user.portfolio.stocks.find(
+    (stock) => stock.ticker.toString() === stockId
+  );
+  if (stockToUpdate) {
+    stockToUpdate.avgPrice = newPrice;
+    await user.save();
+
+    res.json({ success: true });
+  } else console.error("Error updating stocks");
 });
