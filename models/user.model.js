@@ -24,6 +24,7 @@ const UserSchema = mongoose.Schema(
             availableFunds: {
                 type: Number,
                 default: 0,
+                required: true,
             },
             stocks: [
                 {

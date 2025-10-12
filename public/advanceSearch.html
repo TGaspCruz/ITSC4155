@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advance Search</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <header>
+    <h1>&#128269;Advance Search</h1>
+    <nav>
+        <a  class="navLink" href="dashboard.html">Dashboard</a>
+        <a class="navLink" href="portfolio.html">Portfolio</a>
+        <a class="navLink" href="advanceSearch.html">Advance Search</a>
+    </nav>
+    <button id="logoutBtn">Logout</button>
+    </header>
+    <main class="advance-search-main">
+        <div class="search-container">
+            <div class="row">
+                <input type="text" id="input-box" placeholder="Enter stock ticker" autocomplete="off" maxlength="5">
+                <button id="searchButton"><i class="fa fa-search"></i></button>
+            </div>
+            <div id="searchResults">
+                <!-- Search results will be displayed here -->
+                 <ul id="result-list"></ul>
+            </div>
+        </div>
+    </main>
+    <script src="advanceSearch.js"></script>
+</body>
+</html>

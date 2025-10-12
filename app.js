@@ -21,13 +21,13 @@ app.use(session({
 }));
 
 // Block direct static access to dashboard.html when not logged in
-app.use((req, res, next) => {
-    // If a client requests /dashboard.html directly and there's no session user, redirect to login
-    if (req.path === '/dashboard.html' && (!req.session || !req.session.user)) {
-        return res.redirect('/');
-    }
-    next();
-});
+// app.use((req, res, next) => {
+//     // If a client requests /dashboard.html directly and there's no session user, redirect to login
+//     if (req.path === '/dashboard.html' && (!req.session || !req.session.user)) {
+//         return res.redirect('/');
+//     }
+//     next();
+// });
 
 // Serve static files after session middleware so the middleware above can protect specific files
 app.use(express.static('public'));
@@ -35,11 +35,6 @@ app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
-
-
-// app.get('/register', (req, res) => {
-//     res.sendFile(__dirname + '/public/register/register.html');
-// });
 
 app.get('/dashboard', (req, res) => {
     if (!req.session.user) {
@@ -160,6 +155,25 @@ app.post('/logout', (req, res) => {
         res.clearCookie && res.clearCookie('connect.sid');
         return res.json({ success: true, message: 'Logged out' });
     });
+});
+
+app.get('/api/search/:ticker', async (req, res) => {
+    try {
+        const ticker = req.params.ticker;
+        if (!ticker || typeof ticker !== 'string' || ticker.length < 1) {
+            return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
+        }
+        const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`);
+        if (!searchResponse.ok) {
+            throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
+        }
+        const searchJson = await searchResponse.json();
+        console.log('Fetched search results:', searchJson);
+        return res.json({ success: true, results: searchJson.bestMatches || [] });
+    } catch (err) {
+        console.error('Error in /api/search:', err);
+        return res.status(500).json({ success: false, message: 'Error performing search', detail: String(err) });
+    }
 });
 
 
