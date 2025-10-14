@@ -3,25 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>portfolio</title>
-    <link rel="stylesheet" href="portfolio.css">
+    <title>Portfolio</title>
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
     <header>
-        <h1 id="username">&#128188 Portfolio</h1>
+        <h1 id="username">Portfolio</h1>
         <nav>
-            <a href="dashboard.html">Dashboard</a>
-            <button id="logoutBtn">Logout</button>
+        <a  class="navLink" href="dashboard.html">Dashboard</a>
+        <a class="navLink" href="portfolio.html">Portfolio</a>
+        <a class="navLink" href="advanceSearch.html">Advance Search</a>
         </nav>
+        <button id="logoutBtn">Logout</button>
     </header>
-    <main>
+    <main class="portfolio-main">
         <section>
             <h2>Available Funds</h2>
             <p id="available-funds"></p>
         </section>
         <section>
             <h2>Stock Holdings</h2>
-            <div>
+            <div id="table-container">
             <table id="holdings-table" border="1" cellpadding="6">
                 <thead>
                     <tr>
@@ -37,6 +39,7 @@
             </div>
         </section>
     </main>
+    <script src="portfolio.js"></script>
 </body>
 
 <script>

@@ -50,6 +50,36 @@ app.post("/login", async (req, res) => {
       return res
         .status(401)
         .json({ success: false, message: "Invalid email or password" });
+app.get('/dashboard', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/');
+    } else {
+        return res.sendFile(__dirname + '/public/dashboard.html');
+    }
+});
+
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+    
+        // checks for both email and password to match and if one or the other is wrong, it will send a message for which one is wrong
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'Email not associated with account' });
+        }
+        else if (user.password !== password) {
+            return res.status(401).json({ success: false, message: 'Incorrect password' });
+        }
+        req.session.user = {username: user.username, email: user.email};
+        // const user = await User.findOne({ email: email, password: password });
+        // if (!user) {
+        //     return res.status(401).json({ success: false, message: 'Email not associated with account or incorrect password' });
+        // }
+        // req.session.user = {username: user.username, email: user.email};
+        return res.status(200).json({ success: true, message: 'Login successful', redirect: '/dashboard' });
+    } catch (error) {
+        console.error('Error in /login:', error);
+        res.status(500).json({ success: false, message: 'Error logging in. Please try again later.' });
     }
     req.session.user = { username: user.username, email: user.email };
     return res.status(200).json({
@@ -164,6 +194,9 @@ app.post("/logout", (req, res) => {
     if (err) {
       console.error("Error destroying session:", err);
       return res.status(500).json({ success: false, message: "Logout failed" });
+    // password length check
+    if (password.length < 8) {
+        return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long' });
     }
     res.clearCookie && res.clearCookie("connect.sid");
     return res.json({ success: true, message: "Logged out" });
@@ -189,6 +222,27 @@ app.post("/api/buyStock", async (req, res) => {
   user.portfolio.stocks.push({ ticker, quantity, avgPrice: price }); //add stock to the users owned stocks array
   await user.save(); //save
   res.json({ success: true }); //return success
+    const newUser = new User({ username, email, password, portfolio: { availableFunds: 1000, stocks: [] } });
+
+    newUser.save()
+        .then((savedUser) => {
+            // set session to the saved user info
+            req.session.user = { username: savedUser.username, email: savedUser.email };
+            res.status(200).json({ success: true, message: 'Registration successful', redirect: '/dashboard' });
+        })
+        .catch(err => {
+            console.error('Error in /register:', err);
+            // Duplicate key (unique email) error from Mongo
+            if (err && err.code === 11000) {
+                return res.status(409).json({ success: false, message: 'Email already registered. Please log in instead' });
+            }
+            // Validation errors from mongoose
+            if (err && err.name === 'ValidationError') {
+                const messages = Object.values(err.errors).map(e => e.message).join('; ');
+                return res.status(400).json({ success: false, message: messages });
+            }
+            return res.status(500).json({ success: false, message: 'Error registering new user. Please try again later.' });
+        });
 });
 
 app.post("/api/sellStock", async (req, res) => {
@@ -237,6 +291,32 @@ app.get("/api/getFunds", async (req, res) => {
     return res.json({
       success: true,
       availableFunds: user.portfolio.availableFunds,
+// Return the logged-in user's info and portfolio
+app.get('/api/user', async (req, res) => {
+    try {
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({ success: false, message: 'Not logged in' });
+        }
+
+        const user = await User.findOne({ username: req.session.user.username, email: req.session.user.email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        return res.json({ success: true, username: user.username, email: user.email, portfolio: user.portfolio });
+    } catch (err) {
+        console.error('Error in /api/user:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching user data', detail: String(err) });
+    }
+});
+// Logout route - destroys the session
+app.post('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Error destroying session:', err);
+            return res.status(500).json({ success: false, message: 'Logout failed' });
+        }
+        res.clearCookie && res.clearCookie('connect.sid');
+        return res.json({ success: true, message: 'Logged out' });
     });
   } catch (err) {
     console.error("Error fetching funds:", err);
@@ -248,6 +328,25 @@ app.get("/api/getStocks", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ success: false, message: "Not logged in" });
   }
+app.get('/api/search/:ticker', async (req, res) => {
+    try {
+        const ticker = req.params.ticker;
+        if (!ticker || typeof ticker !== 'string' || ticker.length < 1) {
+            return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
+        }
+        const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`);
+        if (!searchResponse.ok) {
+            throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
+        }
+        const searchJson = await searchResponse.json();
+        console.log('Fetched search results:', searchJson);
+        return res.json({ success: true, results: searchJson.bestMatches || [] });
+    } catch (err) {
+        console.error('Error in /api/search:', err);
+        return res.status(500).json({ success: false, message: 'Error performing search', detail: String(err) });
+    }
+});
+
 
   try {
     const user = await User.findOne({ email: req.session.user.email });

@@ -1,3 +1,4 @@
+/* Styles for dashboard page */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -9,15 +10,25 @@ header {
   color: white;
   padding: 1em;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  height: 80px;
+}
+
+h1 {
+  flex: 1;
+  margin: 0;
+  font-size: 35px;
 }
 
 nav a {
-  color: white;
+  color: rgb(0, 0, 0);
   text-decoration: none;
   margin-left: 1em;
-  font-size: 20px;
+  font-size: 25px;
+}
+
+nav a:hover {
+  text-decoration: underline;
 }
 
 main {
@@ -53,21 +64,24 @@ main {
 input[type="text"],
 input[type="number"] {
   width: auto;
-  padding: 0.5em;
-  margin-top: 0.5em;
+  padding: 13px;
   border-radius: 4px;
   border: 1px solid #ccc;
-  margin-bottom: 5px;
 }
 
 button {
-  background-color: blue;
-  color: white;
+  background-color: rgb(0, 170, 255);
+  color: rgb(0, 0, 0);
   border: none;
   padding: 0.5em 1em;
   margin-right: 0.5em;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 20px;
+}
+
+#logoutBtn {
+  margin-left: 20px;
 }
 
 .buyButton {
@@ -94,4 +108,65 @@ button:hover {
   border: 1px solid #ccc; /* border color and thickness */
   background-color: #f9f9f9; /* background fill */
   border-radius: 8px; /* rounded corners */
+}
+/* Styles for portfolio page */
+.portfolio-main {
+  padding: 2em;
+  text-align: center;
+  color: white;
+}
+
+#table-container{
+    display: flex;
+    justify-content: center;
+} 
+
+table {
+    background-color: white;
+    color: black;
+}
+
+/* Advanace Search Page */
+
+.advance-search-main {
+    display: flex;
+    justify-content: center;
+}
+
+.search-container {
+    width: 600px;
+    background: #fff;
+    border-radius: 5px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+}
+
+#input-box {
+    flex: 1;
+    height: 50px;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+#searchResults ul {
+    border-top: 1px solid #080707;
+    padding: 15px 10px;
+    margin-top: 0px;
+}
+
+#searchResults ul li {
+    list-style: none;
+    border-radius: 3px;
+    padding: 15px 10px;
+    cursor: pointer;
+}
+
+#searchResults ul li:hover {
+    background: #e9f3ff;
 }

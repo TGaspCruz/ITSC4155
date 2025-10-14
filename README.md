@@ -1,6 +1,10 @@
+Download Node, MongoDB
+
 npm install
 
 create .env file
+
+change MongoDBURL in app.js to your DB url
 
 Get Alpha Vantage free API KEY
 
