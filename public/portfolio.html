@@ -19,7 +19,7 @@
     <main class="portfolio-main">
         <section>
             <h2>Available Funds</h2>
-            <p id="available-funds">$0.00</p>
+            <p id="available-funds"></p>
         </section>
         <section>
             <h2>Stock Holdings</h2>
@@ -41,4 +41,120 @@
     </main>
     <script src="portfolio.js"></script>
 </body>
+
+<script>
+
+    
+    
+    
+    async function getFunds() {
+  
+  
+  
+  const res = await fetch("/api/getFunds");
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById("available-funds").textContent = data.availableFunds;
+    
+  } else {
+    console.error("Failed to fetch funds:", data.message);
+  }
+}
+
+async function getStocks() {
+  const res = await fetch("/api/getStocks");
+  const data = await res.json();
+  if (data.success) {
+    const tbody = document.getElementById("holdings-body");
+    tbody.innerHTML = ""; 
+
+    data.stocks.forEach(stock => {
+      const marketValue = (stock.quantity * stock.avgPrice).toFixed(2);
+      const row = document.createElement("tr");
+      
+      row.innerHTML = `
+        <td>${stock.ticker}</td>
+        <td>${stock.quantity}</td>
+        <td>${stock.avgPrice.toFixed(2)}</td>
+        <td>${marketValue}</td>
+        <td id = "${stock._id}"> <button id= "sellStockButton${stock._id}">Sell</button> </td>
+      `;
+
+      tbody.appendChild(row);
+
+
+
+      
+    });
+
+     data.stocks.forEach(stock => { 
+      document.getElementById("sellStockButton" + stock._id).addEventListener("click", () => {
+
+
+      let clickedStock = document.getElementById("sellStockButton" + stock._id).parentElement.id;
+      console.log(clickedStock + stock._id);
+    
+      data.stocks.forEach(stock => {
+        let sellname = document.getElementById([stock._id]);
+      
+        if(clickedStock === stock._id){
+        console.log(sellname);
+        alert("Sold " + stock._id );
+
+        document.getElementById(stock._id).parentElement.style.display = "none";
+        
+
+        fetch("/api/sellStock", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    ticker: stock._id,
+    price: stock.avgPrice.toFixed(2),
+    quantity: stock.quantity
+  })
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    
+  });
+
+  
+
+        
+        
+        }
+        
+      
+      
+      
+      }
+      
+        
+      );
+      
+    });
+
+
+     });
+    
+    
+  } else {
+    console.error("Failed to fetch stocks:", data.message);
+  }
+}
+
+
+
+
+window.addEventListener("load", () => {
+  getFunds();
+  getStocks();
+});
+
+
+
+</script>
 </html>

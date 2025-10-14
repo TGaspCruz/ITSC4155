@@ -1,5 +1,743 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <header>
+      <h1>&#128200; Stock Dashboard</h1>
+
+      <h1 id="portfolio-value">Portfolio Value: $0</h1>
+
+      <p id="invested"></p>
+
+      <script></script>
+      <br />
+      <p id="available-funds"></p>
+      <script>
+        let portfolioValue = 0;
+
+        let invested = 0;
+
+        window.addEventListener("load", () => {
+          getStocks();
+        });
+
+        async function getStocks() {
+          const res = await fetch("/api/getStocks");
+          const data = await res.json();
+          if (data.success) {
+            data.stocks.forEach((stock) => {
+              portfolioValue += stock.quantity * stock.avgPrice;
+              document.getElementById("portfolio-value").textContent =
+                "Portfolio Value: $" + portfolioValue.toFixed(2);
+            });
+          }
+        }
+      </script>
+      <nav>
+        <a href="portfolio.html">Portfolio</a>
+        <button id="logoutBtn">Logout</button>
+      </nav>
+    </header>
+    <main>
+      <div class="dashboard">
+        <section class="left-column">
+          <h2>Top Stock Gainers <b>AGMH ⬆️ %57</b></h2>
+          <ul id="gainers-list"></ul>
+
+          <h2>Top Stock Losers <b>PTL ⬇️ %57</b></h2>
+          <ul id="losers-list"></ul>
+
+          <h2>Most Actively Traded Stocks <b> ⚡NVDA </b></h2>
+          <ul id="active-list"></ul>
+          <canvas id="priceChart" width="400" height="100"></canvas>
+        </section>
+        <section class="right-column">
+          <h2>Trade Center</h2>
+
+          <input type="text" id="ticker" placeholder="Enter stock ticker" />
+
+          <button id="searchBtn">Search</button>
+          <button id="buyButton" class="buyButton">Buy</button>
+
+          <p id="searchedTickerPrice"></p>
+          <div id="trade-form" class="form-popup">
+            <h3 id="form-title">Trade Stock</h3>
+
+            <form action="/api/buyStock" method="POST">
+              <label for="quantity">Quantity:</label>
+              <input type="number" id="quantity" name="quantity" required />
+
+              <p id="available-funds-buy">Available funds:</p>
+              <script>
+                async function getFunds() {
+                  const res = await fetch("/api/getFunds");
+                  const data = await res.json();
+                  if (data.success) {
+                    document.getElementById("available-funds-buy").textContent =
+                      "Available funds: " + data.availableFunds;
+
+                    invested = 1000 - data.availableFunds;
+                    document.getElementById("invested").textContent =
+                      "Invested " + "$" + invested.toFixed(2);
+                  } else {
+                    console.error("Failed to fetch funds:", data.message);
+                  }
+                }
+
+                getFunds();
+                setInterval(getFunds, 2000);
+              </script>
+
+              <!-- Hidden inputs to include ticker and price in the POST -->
+              <input type="hidden" id="hiddenTicker" name="ticker" />
+              <input type="hidden" id="hiddenPrice" name="price" />
+
+              <button id="buyBtn" type="submit">Buy</button>
+            </form>
+          </div>
+        </section>
+      </div>
+      <canvas id="priceChart" width="500" height="100"></canvas>
+    </main>
+
+    <script>
+      document.getElementById("buyButton").style.display = "none";
+
+      // Basic search (Requires further implementation)
+      async function searchStock() {
+        const searchedTickerPrice = document.getElementById(
+          "searchedTickerPrice"
+        );
+        const tickerInput = document
+          .getElementById("ticker")
+          .value.toUpperCase();
+        //const response = await fetch(
+        //  "https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=YOUR_API_KEY"
+        //);
+        //const json = await response.json();
+        //console.log(JSON.stringify(json));
+        const json = {
+          metadata: "Top gainers, losers, and most actively traded US tickers",
+          last_updated: "2025-09-19 16:16:00 US/Eastern",
+          top_gainers: [
+            {
+              ticker: "AGMH",
+              price: "10.34",
+              change_amount: "8.11",
+              change_percentage: "363.6771%",
+              volume: "206411874",
+            },
+            {
+              ticker: "CJET",
+              price: "0.2909",
+              change_amount: "0.1896",
+              change_percentage: "187.1668%",
+              volume: "1670382664",
+            },
+            {
+              ticker: "ARQQW",
+              price: "0.9799",
+              change_amount: "0.5368",
+              change_percentage: "121.1465%",
+              volume: "840419",
+            },
+            {
+              ticker: "SAIHW",
+              price: "0.3738",
+              change_amount: "0.2038",
+              change_percentage: "119.8824%",
+              volume: "9589",
+            },
+            {
+              ticker: "PLTS",
+              price: "7.13",
+              change_amount: "3.13",
+              change_percentage: "78.25%",
+              volume: "4452373",
+            },
+            {
+              ticker: "ATMCW",
+              price: "0.09",
+              change_amount: "0.039",
+              change_percentage: "76.4706%",
+              volume: "21102",
+            },
+            {
+              ticker: "CAPTW",
+              price: "0.0401",
+              change_amount: "0.0149",
+              change_percentage: "59.127%",
+              volume: "101",
+            },
+            {
+              ticker: "OKLL",
+              price: "91.6",
+              change_amount: "33.54",
+              change_percentage: "57.7678%",
+              volume: "3623247",
+            },
+            {
+              ticker: "DFSCW",
+              price: "0.062",
+              change_amount: "0.022",
+              change_percentage: "55.0%",
+              volume: "129537",
+            },
+            {
+              ticker: "QUBX",
+              price: "35.15",
+              change_amount: "12.21",
+              change_percentage: "53.2258%",
+              volume: "2815996",
+            },
+            {
+              ticker: "DSYWW",
+              price: "0.0406",
+              change_amount: "0.014",
+              change_percentage: "52.6316%",
+              volume: "113142",
+            },
+            {
+              ticker: "FATN",
+              price: "8.89",
+              change_amount: "2.9",
+              change_percentage: "48.414%",
+              volume: "11050702",
+            },
+            {
+              ticker: "PSQH+",
+              price: "0.267",
+              change_amount: "0.087",
+              change_percentage: "48.3333%",
+              volume: "54959",
+            },
+            {
+              ticker: "OUSTW",
+              price: "0.015",
+              change_amount: "0.0048",
+              change_percentage: "47.0588%",
+              volume: "156241",
+            },
+            {
+              ticker: "CLNNW",
+              price: "0.0296",
+              change_amount: "0.0094",
+              change_percentage: "46.5347%",
+              volume: "1166",
+            },
+            {
+              ticker: "SMUP",
+              price: "17.7",
+              change_amount: "5.57",
+              change_percentage: "45.9192%",
+              volume: "463719",
+            },
+            {
+              ticker: "SMU",
+              price: "34.03",
+              change_amount: "10.66",
+              change_percentage: "45.614%",
+              volume: "4965502",
+            },
+            {
+              ticker: "ATMV",
+              price: "22.2",
+              change_amount: "6.78",
+              change_percentage: "43.9689%",
+              volume: "1100895",
+            },
+            {
+              ticker: "EOSEW",
+              price: "0.811",
+              change_amount: "0.241",
+              change_percentage: "42.2807%",
+              volume: "616491",
+            },
+            {
+              ticker: "QMCO",
+              price: "11.88",
+              change_amount: "3.43",
+              change_percentage: "40.5917%",
+              volume: "21987414",
+            },
+          ],
+          top_losers: [
+            {
+              ticker: "SHOTW",
+              price: "0.0156",
+              change_amount: "-0.0269",
+              change_percentage: "-63.2941%",
+              volume: "22063",
+            },
+            {
+              ticker: "LSBPW",
+              price: "0.0102",
+              change_amount: "-0.0098",
+              change_percentage: "-49.0%",
+              volume: "772863",
+            },
+            {
+              ticker: "MYSEW",
+              price: "0.0549",
+              change_amount: "-0.0451",
+              change_percentage: "-45.1%",
+              volume: "10730",
+            },
+            {
+              ticker: "RVPH",
+              price: "0.2666",
+              change_amount: "-0.1528",
+              change_percentage: "-36.433%",
+              volume: "37079066",
+            },
+            {
+              ticker: "BREA",
+              price: "16.6",
+              change_amount: "-8.3",
+              change_percentage: "-33.3333%",
+              volume: "21718293",
+            },
+            {
+              ticker: "SYTAW",
+              price: "0.0122",
+              change_amount: "-0.0051",
+              change_percentage: "-29.4798%",
+              volume: "60775",
+            },
+            {
+              ticker: "LIMNW",
+              price: "0.1164",
+              change_amount: "-0.0486",
+              change_percentage: "-29.4545%",
+              volume: "10350",
+            },
+            {
+              ticker: "ALTO",
+              price: "0.9172",
+              change_amount: "-0.3678",
+              change_percentage: "-28.6226%",
+              volume: "1808548",
+            },
+            {
+              ticker: "CREVW",
+              price: "0.0153",
+              change_amount: "-0.0061",
+              change_percentage: "-28.5047%",
+              volume: "67496",
+            },
+            {
+              ticker: "MYPSW",
+              price: "0.0146",
+              change_amount: "-0.0056",
+              change_percentage: "-27.7228%",
+              volume: "1625",
+            },
+            {
+              ticker: "RVPHW",
+              price: "0.0446",
+              change_amount: "-0.0166",
+              change_percentage: "-27.1242%",
+              volume: "189531",
+            },
+            {
+              ticker: "QSIAW",
+              price: "0.22",
+              change_amount: "-0.0787",
+              change_percentage: "-26.3475%",
+              volume: "351459",
+            },
+            {
+              ticker: "NXLIW",
+              price: "0.01",
+              change_amount: "-0.0035",
+              change_percentage: "-25.9259%",
+              volume: "138591",
+            },
+            {
+              ticker: "AERTW",
+              price: "0.045",
+              change_amount: "-0.015",
+              change_percentage: "-25.0%",
+              volume: "26082",
+            },
+            {
+              ticker: "ADSEW",
+              price: "0.58",
+              change_amount: "-0.19",
+              change_percentage: "-24.6753%",
+              volume: "8243",
+            },
+            {
+              ticker: "SABSW",
+              price: "0.0271",
+              change_amount: "-0.0077",
+              change_percentage: "-22.1264%",
+              volume: "38795",
+            },
+            {
+              ticker: "ATCH",
+              price: "0.9144",
+              change_amount: "-0.2556",
+              change_percentage: "-21.8462%",
+              volume: "82273986",
+            },
+            {
+              ticker: "BTBDW",
+              price: "0.2526",
+              change_amount: "-0.0694",
+              change_percentage: "-21.5528%",
+              volume: "487",
+            },
+            {
+              ticker: "LSB",
+              price: "0.627",
+              change_amount: "-0.1635",
+              change_percentage: "-20.6831%",
+              volume: "660289",
+            },
+            {
+              ticker: "BNZIW",
+              price: "0.017",
+              change_amount: "-0.004",
+              change_percentage: "-19.0476%",
+              volume: "11953",
+            },
+          ],
+          most_actively_traded: [
+            {
+              ticker: "CJET",
+              price: "0.2909",
+              change_amount: "0.1896",
+              change_percentage: "187.1668%",
+              volume: "1670382664",
+            },
+            {
+              ticker: "YAAS",
+              price: "0.087",
+              change_amount: "0.0115",
+              change_percentage: "15.2318%",
+              volume: "640112295",
+            },
+            {
+              ticker: "ADAP",
+              price: "0.1444",
+              change_amount: "-0.0156",
+              change_percentage: "-9.75%",
+              volume: "510823830",
+            },
+            {
+              ticker: "NVDA",
+              price: "176.5966",
+              change_amount: "0.3566",
+              change_percentage: "0.2023%",
+              volume: "235588947",
+            },
+            {
+              ticker: "OPEN",
+              price: "9.57",
+              change_amount: "-0.37",
+              change_percentage: "-3.7223%",
+              volume: "227445746",
+            },
+            {
+              ticker: "INTC",
+              price: "29.58",
+              change_amount: "-0.99",
+              change_percentage: "-3.2385%",
+              volume: "222988853",
+            },
+            {
+              ticker: "AGMH",
+              price: "10.34",
+              change_amount: "8.11",
+              change_percentage: "363.6771%",
+              volume: "206411874",
+            },
+            {
+              ticker: "HOOD",
+              price: "124.78",
+              change_amount: "3.87",
+              change_percentage: "3.2007%",
+              volume: "185896660",
+            },
+            {
+              ticker: "SNAP",
+              price: "8.165",
+              change_amount: "-0.275",
+              change_percentage: "-3.2583%",
+              volume: "178851274",
+            },
+            {
+              ticker: "WBD",
+              price: "19.33",
+              change_amount: "0.63",
+              change_percentage: "3.369%",
+              volume: "166976750",
+            },
+            {
+              ticker: "AAPL",
+              price: "245.5",
+              change_amount: "7.62",
+              change_percentage: "3.2033%",
+              volume: "162574587",
+            },
+            {
+              ticker: "PLUG",
+              price: "2.18",
+              change_amount: "0.08",
+              change_percentage: "3.8095%",
+              volume: "157349729",
+            },
+            {
+              ticker: "BBAI",
+              price: "6.85",
+              change_amount: "0.57",
+              change_percentage: "9.0764%",
+              volume: "149727493",
+            },
+            {
+              ticker: "RAYA",
+              price: "0.0596",
+              change_amount: "-0.001",
+              change_percentage: "-1.6502%",
+              volume: "138532012",
+            },
+            {
+              ticker: "HL",
+              price: "10.99",
+              change_amount: "0.22",
+              change_percentage: "2.0427%",
+              volume: "135810170",
+            },
+            {
+              ticker: "RGTI",
+              price: "28.52",
+              change_amount: "3.78",
+              change_percentage: "15.2789%",
+              volume: "127021075",
+            },
+            {
+              ticker: "SOXS",
+              price: "5.545",
+              change_amount: "0.105",
+              change_percentage: "1.9301%",
+              volume: "118127194",
+            },
+            {
+              ticker: "DNN",
+              price: "2.695",
+              change_amount: "0.125",
+              change_percentage: "4.8638%",
+              volume: "111442346",
+            },
+            {
+              ticker: "CPNG",
+              price: "32.88",
+              change_amount: "-0.54",
+              change_percentage: "-1.6158%",
+              volume: "108979026",
+            },
+            {
+              ticker: "PLTR",
+              price: "182.39",
+              change_amount: "5.42",
+              change_percentage: "3.0627%",
+              volume: "108372217",
+            },
+          ],
+        };
+
+        console.log(JSON.stringify(json));
+
+        const ticker = document.getElementById("ticker").value.toUpperCase();
+        if (ticker) {
+          const topGainers = json.top_gainers;
+
+          for (let i = 0; i < topGainers.length; i++) {
+            if (topGainers[i].ticker === ticker) {
+              console.log(
+                `Found ticker ${ticker} with price: ${topGainers[i].price}`
+              );
+
+              searchedTickerPrice.textContent = topGainers[i].price;
+
+              document.getElementById("buyButton").style.display = "block";
+
+              // Set hidden input values for form submission
+              document.getElementById("hiddenTicker").value = tickerInput;
+              document.getElementById("hiddenPrice").value =
+                topGainers[i].price;
+
+              break; // Stop the loop once found
+            }
+          }
+        } else {
+          alert("Please enter a stock ticker.");
+        }
+      }
+      // Basic form display(Requires further implementation)
+      function showForm(type) {
+        document.getElementById("form-title").textContent =
+          type === "buy" ? "Buy Stock" : "Sell Stock";
+        document.getElementById("trade-form").style.display = "block";
+      }
+
+      function closeForm() {
+        document.getElementById("trade-form").style.display = "none";
+      }
+
+      // Basic logout (Requires further implementation)
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", async () => {
+          try {
+            const response = await fetch("/logout", { method: "POST" });
+            // ignore response and redirect to login (Testing Logout)
+            window.location.href = "/";
+          } catch (err) {
+            console.error("Logout failed", err);
+            window.location.href = "/";
+          }
+        });
+
+      const buyBtn = document.getElementById("buyBtn");
+
+      buyBtn.addEventListener("click", function () {
+        const amount = document.getElementById("quantity").value;
+        let searchedTickerPrice2 = document.getElementById(
+          "searchedTickerPrice"
+        );
+        const num = parseFloat(searchedTickerPrice2.textContent) * amount;
+        alert("Bought $" + num + " of stock in" + tickerInput);
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const searchBtn = document.getElementById("searchBtn");
+        if (searchBtn) {
+          searchBtn.addEventListener("click", searchStock);
+        }
+
+        const buyButton = document.getElementById("buyButton");
+        if (buyButton) {
+          buyButton.addEventListener("click", () => showForm("buy"));
+        }
+
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", async () => {
+            try {
+              const response = await fetch("/logout", { method: "POST" });
+              window.location.href = "/";
+            } catch (err) {
+              console.error("Logout failed", err);
+              window.location.href = "/";
+            }
+          });
+        }
+
+        const buyBtn = document.getElementById("buyBtn");
+        if (buyBtn) {
+          buyBtn.addEventListener("click", async function () {
+            const amount = document.getElementById("quantity").value; //how many shares they want to buy
+
+            const num = parseFloat(searchedTickerPrice.textContent) * amount; // the total price (share price * shares)
+
+            const data = await getFunds();
+
+            if (data.availableFunds < num) {
+              alert("Not enough money");
+            }
+
+            invested += num;
+          });
+        }
+      });
+
+      async function simulateStockUpdates() {
+        portfolioValue = 0;
+        const res = await fetch("/api/getStocks");
+        const data = await res.json();
+        if (data.success) {
+          data.stocks.forEach((stock) => {
+            stock.avgPrice += Math.random() - 0.5; // Random walk
+            console.log(`Updated ${stock.ticker} to ${stock.avgPrice}`);
+          });
+          data.stocks.forEach((stock) => {
+            portfolioValue += stock.quantity * stock.avgPrice;
+
+            fetch("/api/updatePrice", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ticker: stock.ticker,
+                price: stock.avgPrice.toFixed(2),
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log(data);
+              });
+
+            if (portfolioValue > invested) {
+              document.getElementById("portfolio-value").textContent =
+                "Portfolio Value: $" +
+                portfolioValue.toFixed(2) +
+                "🤑" +
+                (portfolioValue / invested).toFixed(2) +
+                "%";
+            } else
+              document.getElementById("portfolio-value").textContent =
+                "Portfolio Value: $" +
+                portfolioValue.toFixed(2) +
+                "😭" +
+                (portfolioValue / invested).toFixed(2) +
+                "%";
+          });
+        }
+      }
+
+      setInterval(simulateStockUpdates, 1000); // Update every 5 seconds
+    </script>
+
+    <script>
+      const canvas = document.getElementById("priceChart");
+      const ctx = canvas.getContext("2d");
+
+      let avgPrice = portfolioValue;
+      let prices = [avgPrice];
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - avgPrice);
+        for (let i = 0; i < prices.length; i++) {
+          ctx.lineTo(i * 4, canvas.height - prices[i]);
+        }
+        ctx.lineWidth = 1; // Line thickness 5px
+        ctx.strokeStyle = "green"; // Blue color line
+        ctx.lineCap = "round"; // Rounded line endpoints
+        ctx.lineJoin = "round"; // Rounded corners between lines
+
+        ctx.stroke();
+      }
+
+      function update() {
+        avgPrice = portfolioValue / 3;
+        prices.push(avgPrice);
+        if (prices.length > 100) prices.shift();
+        draw();
+      }
+
+      setInterval(update, 100);
+    </script>
+  </body>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
