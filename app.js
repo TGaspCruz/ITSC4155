@@ -26,42 +26,20 @@ app.use(
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
-});
-
-app.get("/register", (req, res) => {
-  res.sendFile(__dirname + "/public/register/register.html");
+    res.sendFile(__dirname + "/public/index.html");
 });
 
 app.get("/dashboard", (req, res) => {
-  if (!req.session.user) {
-    return res.redirect("/");
-  } else {
-    return res.sendFile(__dirname + "/public/dashboard.html");
-  }
-});
-
-app.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    // Use findOne to avoid getting an array and reassigning const
-    const user = await User.findOne({ email: email, password: password });
-    if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password" });
-app.get('/dashboard', (req, res) => {
     if (!req.session.user) {
-        return res.redirect('/');
+        return res.redirect("/");
     } else {
-        return res.sendFile(__dirname + '/public/dashboard.html');
+        return res.sendFile(__dirname + "/public/dashboard.html");
     }
 });
 
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-    
         // checks for both email and password to match and if one or the other is wrong, it will send a message for which one is wrong
         const user = await User.findOne({ email: email });
         if (!user) {
@@ -81,97 +59,88 @@ app.post('/login', async (req, res) => {
         console.error('Error in /login:', error);
         res.status(500).json({ success: false, message: 'Error logging in. Please try again later.' });
     }
-    req.session.user = { username: user.username, email: user.email };
-    return res.status(200).json({
-      success: true,
-      message: "Login successful",
-      redirect: "/dashboard",
-    });
-  } catch (error) {
-    console.error("Error in /login:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error logging in. Please try again later.",
-    });
-  }
 });
 
 app.post("/register", (req, res) => {
-  const { username, email, password } = req.body;
-  console.log("Register payload:", req.body);
+    const { username, email, password } = req.body;
+    console.log("Register payload:", req.body);
 
-  // Basic validation
-  if (!username || !email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "username, email and password are required",
-    });
-  }
+    // Basic validation
+    if (!username || !email || !password) {
+        return res.status(400).json({
+            success: false,
+            message: "username, email and password are required",
+        });
+    }
 
-  // email pattern check
-  const emailRegex = /.+@.+\..+/;
-  if (!emailRegex.test(email)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Please enter a valid email address" });
-  }
-
-  // password length check
-  if (password.length < 8) {
-    return res.status(400).json({
-      success: false,
-      message: "Password must be at least 8 characters",
-    });
-  }
-
-  const newUser = new User({
-    username,
-    email,
-    password,
-    portfolio: { availableFunds: 1000, stocks: [] },
-  });
-
-  newUser
-    .save()
-    .then((savedUser) => {
-      // set session to the saved user info
-      req.session.user = {
-        username: savedUser.username,
-        email: savedUser.email,
-      };
-      res.status(200).json({
-        success: true,
-        message: "Registration successful",
-        redirect: "/dashboard",
-      });
-    })
-    .catch((err) => {
-      console.error("Error in /register:", err);
-      // Duplicate key (unique email) error from Mongo
-      if (err && err.code === 11000) {
+    // email pattern check
+    const emailRegex = /.+@.+\..+/;
+    if (!emailRegex.test(email)) {
         return res
-          .status(409)
-          .json({ success: false, message: "Email already in use" });
-      }
-      // Validation errors from mongoose
-      if (err && err.name === "ValidationError") {
-        const messages = Object.values(err.errors)
-          .map((e) => e.message)
-          .join("; ");
-        return res.status(400).json({ success: false, message: messages });
-      }
-      return res.status(500).json({
-        success: false,
-        message: "Error registering new user. Please try again later.",
-      });
+        .status(400)
+        .json({
+            success: false,
+            message: "Please enter a valid email address" 
+        });
+    }
+
+    // password length check
+    if (password.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters",
+        });
+    }
+
+    const newUser = new User({
+        username,
+        email,
+        password,
+        portfolio: { availableFunds: 1000, stocks: [] },
     });
+
+    newUser.save()
+        .then((savedUser) => {
+        // set session to the saved user info
+            req.session.user = {
+                username: savedUser.username,
+                email: savedUser.email,
+            };
+            res.status(200).json({
+                success: true,
+                message: "Registration successful",
+                redirect: "/dashboard",
+            });
+        })
+        .catch((err) => {
+        console.error("Error in /register:", err);
+        // Duplicate key (unique email) error from Mongo
+        if (err && err.code === 11000) {
+            return res
+            .status(409)
+            .json({ 
+                success: false, 
+                message: "Email already in use" 
+            });
+        }
+        // Validation errors from mongoose
+        if (err && err.name === "ValidationError") {
+            const messages = Object.values(err.errors).map((e) => e.message).join("; ");
+            return res.status(400).json({ 
+                success: false, 
+                message: messages 
+            });
+        }
+        return res.status(500).json({
+            success: false,
+            message: "Error registering new user. Please try again later.",
+            });
+        });
 });
 
 app.get("/api/stockList", async (req, res) => {
   try {
-    const stockListResponse = await fetch(
-      `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${process.env.API_KEY}`
-    );
+    const stockListResponse = await fetch(`https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${process.env.API_KEY}`);
     if (!stockListResponse.ok) {
       throw new Error(`AlphaVantage HTTP ${stockListResponse.status}`);
     }
@@ -181,68 +150,43 @@ app.get("/api/stockList", async (req, res) => {
   } catch (err) {
     console.error("Error in /api/stockList:", err);
     return res.status(500).json({
-      success: false,
-      message: "Error fetching stock data",
-      detail: String(err),
-    });
-  }
+        success: false,
+        message: "Error fetching stock data",
+        detail: String(err),
+        });
+    }
 });
 
 // Logout route - destroys the session
 app.post("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Error destroying session:", err);
-      return res.status(500).json({ success: false, message: "Logout failed" });
-    // password length check
-    if (password.length < 8) {
-        return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long' });
-    }
-    res.clearCookie && res.clearCookie("connect.sid");
-    return res.json({ success: true, message: "Logged out" });
-  });
+    req.session.destroy((err) => {
+        if (err) {
+        console.error("Error destroying session:", err);
+        return res.status(500).json({ success: false, message: "Logout failed" });
+        }
+        res.clearCookie && res.clearCookie("connect.sid");
+        return res.json({ success: true, message: "Logged out" });
+    });
 });
 
 //buy stock request. when the user clicks the confirm button to buy stock, this is called.
-
 app.post("/api/buyStock", async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ success: false }); //if not user, throw 401 error
+    if (!req.session.user) return res.status(401).json({ success: false }); //if not user, throw 401 error
 
-  const { ticker, price, quantity } = req.body; // variables passed in the html post form body
+    const { ticker, price, quantity } = req.body; // variables passed in the html post form body
 
-  const user = await User.findOne({ email: req.session.user.email }); // find the matching users email
+    const user = await User.findOne({ email: req.session.user.email }); // find the matching users email
 
-  const totalCost = price * quantity; //calculate the cost of the purchased stock
+    const totalCost = price * quantity; //calculate the cost of the purchased stock
 
-  if (user.portfolio.availableFunds < totalCost) {
-    return res.status(400).json({ success: false });
-  } // verify user has enough funds
+    if (user.portfolio.availableFunds < totalCost) {
+        return res.status(400).json({ success: false });
+    } // verify user has enough funds
 
-  user.portfolio.availableFunds -= totalCost; //deduct funds
-  user.portfolio.stocks.push({ ticker, quantity, avgPrice: price }); //add stock to the users owned stocks array
-  await user.save(); //save
-  res.json({ success: true }); //return success
-    const newUser = new User({ username, email, password, portfolio: { availableFunds: 1000, stocks: [] } });
-
-    newUser.save()
-        .then((savedUser) => {
-            // set session to the saved user info
-            req.session.user = { username: savedUser.username, email: savedUser.email };
-            res.status(200).json({ success: true, message: 'Registration successful', redirect: '/dashboard' });
-        })
-        .catch(err => {
-            console.error('Error in /register:', err);
-            // Duplicate key (unique email) error from Mongo
-            if (err && err.code === 11000) {
-                return res.status(409).json({ success: false, message: 'Email already registered. Please log in instead' });
-            }
-            // Validation errors from mongoose
-            if (err && err.name === 'ValidationError') {
-                const messages = Object.values(err.errors).map(e => e.message).join('; ');
-                return res.status(400).json({ success: false, message: messages });
-            }
-            return res.status(500).json({ success: false, message: 'Error registering new user. Please try again later.' });
-        });
+    user.portfolio.availableFunds -= totalCost; //deduct funds
+    user.portfolio.stocks.push({ ticker, quantity, avgPrice: price }); //add stock to the users owned stocks array
+    await user.save(); //save
+    res.json({ success: true }); //return success
 });
 
 app.post("/api/sellStock", async (req, res) => {
@@ -272,8 +216,6 @@ app.post("/api/sellStock", async (req, res) => {
   res.json({ success: true });
 });
 
-module.exports = app;
-
 //get the users funds
 app.get("/api/getFunds", async (req, res) => {
   if (!req.session.user) {
@@ -291,6 +233,12 @@ app.get("/api/getFunds", async (req, res) => {
     return res.json({
       success: true,
       availableFunds: user.portfolio.availableFunds,
+    })
+  } catch (error) {
+    return;
+  }
+});
+
 // Return the logged-in user's info and portfolio
 app.get('/api/user', async (req, res) => {
     try {
@@ -308,26 +256,13 @@ app.get('/api/user', async (req, res) => {
         return res.status(500).json({ success: false, message: 'Error fetching user data', detail: String(err) });
     }
 });
-// Logout route - destroys the session
-app.post('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) {
-            console.error('Error destroying session:', err);
-            return res.status(500).json({ success: false, message: 'Logout failed' });
-        }
-        res.clearCookie && res.clearCookie('connect.sid');
-        return res.json({ success: true, message: 'Logged out' });
-    });
-  } catch (err) {
-    console.error("Error fetching funds:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-});
 
 app.get("/api/getStocks", async (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ success: false, message: "Not logged in" });
-  }
+    if (!req.session.user) {
+        return res.status(401).json({ success: false, message: "Not logged in" });
+    }
+});
+
 app.get('/api/search/:ticker', async (req, res) => {
     try {
         const ticker = req.params.ticker;
@@ -347,36 +282,22 @@ app.get('/api/search/:ticker', async (req, res) => {
     }
 });
 
-
-  try {
-    const user = await User.findOne({ email: req.session.user.email });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-
-    return res.json({ success: true, stocks: user.portfolio.stocks });
-  } catch (err) {
-    console.error("Error fetching stocks:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
 app.post("/api/updatePrice", async (req, res) => {
-  const stockId = req.body.ticker;
-  const newPrice = req.body.price;
+    const stockId = req.body.ticker;
+    const newPrice = req.body.price;
 
-  parseFloat(newPrice);
-  const user = await User.findOne({ email: req.session.user.email });
+    parseFloat(newPrice);
+    const user = await User.findOne({ email: req.session.user.email });
 
-  const stockToUpdate = user.portfolio.stocks.find(
-    (stock) => stock.ticker.toString() === stockId
-  );
-  if (stockToUpdate) {
-    stockToUpdate.avgPrice = newPrice;
-    await user.save();
+    const stockToUpdate = user.portfolio.stocks.find(
+        (stock) => stock.ticker.toString() === stockId
+    );
+    if (stockToUpdate) {
+        stockToUpdate.avgPrice = newPrice;
+        await user.save();
 
-    res.json({ success: true });
-  } else console.error("Error updating stocks");
+        res.json({ success: true });
+    } else console.error("Error updating stocks");
 });
+
+module.exports = app;

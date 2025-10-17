@@ -20,7 +20,9 @@ signupForm.addEventListener("submit", async function(event) {
             },
             body: JSON.stringify(data)
         });
-
+        if (!response.ok) {
+            throw new Error(`Server issue ${searchResponse.status}`);
+        }
         const payload = await response.json();
 
         console.log('Response payload:', payload);

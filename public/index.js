@@ -2,8 +2,6 @@
 //     return variable;
 // }
 
-// const { set } = require("../app");
-
 // login form submission handler
 let loginForm = document.getElementById("loginForm");
 let loginMessage = document.getElementById('loginMessage');

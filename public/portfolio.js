@@ -37,7 +37,7 @@ async function loadPortfolio() {
     }
 }
 
-loadPortfolio();
+//loadPortfolio();
 // logout handler
 
 document.getElementById('logoutBtn')?.addEventListener('click', async () => {
