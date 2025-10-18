@@ -171,49 +171,59 @@ app.post("/logout", (req, res) => {
 
 //buy stock request. when the user clicks the confirm button to buy stock, this is called.
 app.post("/api/buyStock", async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ success: false }); //if not user, throw 401 error
+    if (!req.session.user) return res.status(401).json({ success: false });
 
-    const { ticker, price, quantity } = req.body; // variables passed in the html post form body
-
-    const user = await User.findOne({ email: req.session.user.email }); // find the matching users email
-
-    const totalCost = price * quantity; //calculate the cost of the purchased stock
+    const { ticker, price, quantity } = req.body;
+    const user = await User.findOne({ email: req.session.user.email });
+    const totalCost = price * quantity;
 
     if (user.portfolio.availableFunds < totalCost) {
-        return res.status(400).json({ success: false });
-    } // verify user has enough funds
+        return res.status(400).json({ success: false, message: 'Insufficient funds' });
+    }
 
-    user.portfolio.availableFunds -= totalCost; //deduct funds
-    user.portfolio.stocks.push({ ticker, quantity, avgPrice: price }); //add stock to the users owned stocks array
-    await user.save(); //save
-    res.json({ success: true }); //return success
+    user.portfolio.availableFunds -= totalCost;
+
+    // Aggregate stocks by ticker
+    let stock = user.portfolio.stocks.find(s => s.ticker === ticker);
+    if (stock) {
+        // Calculate new avgPrice
+        const prevTotal = stock.avgPrice * stock.quantity;
+        const newTotal = price * quantity;
+        const newQty = stock.quantity + Number(quantity);
+        stock.avgPrice = (prevTotal + newTotal) / newQty;
+        stock.quantity = newQty;
+    } else {
+        user.portfolio.stocks.push({ ticker, quantity: Number(quantity), avgPrice: Number(price) });
+    }
+    await user.save();
+    res.json({ success: true });
 });
 
 app.post("/api/sellStock", async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ success: false }); //if not user, throw 401 error
+        if (!req.session.user) return res.status(401).json({ success: false });
 
-  const stockId = req.body.ticker;
+        const { ticker, price, quantity } = req.body;
+        const user = await User.findOne({ email: req.session.user.email });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+        if (!user.portfolio.stocks) return res.status(400).json({ success: false, message: "No stocks to sell" });
 
-  const totalCost = req.body.price * req.body.quantity;
+        let stock = user.portfolio.stocks.find(s => s.ticker === ticker);
+        if (!stock || stock.quantity < quantity) {
+                return res.status(400).json({ success: false, message: "Not enough stock to sell" });
+        }
 
-  const user = await User.findOne({ email: req.session.user.email });
+        // Calculate total sale value
+        const totalValue = price * quantity;
+        user.portfolio.availableFunds += totalValue;
 
-  if (!user)
-    return res.status(404).json({ success: false, message: "User not found" });
-  if (!user.portfolio.stocks)
-    return res
-      .status(400)
-      .json({ success: false, message: "No stocks to sell" });
-
-  user.portfolio.stocks = user.portfolio.stocks.filter((stock) => {
-    return stock._id.toString() !== stockId;
-  });
-
-  user.portfolio.availableFunds += totalCost; //add the funds
-
-  await user.save();
-
-  res.json({ success: true });
+        // Adjust quantity
+        stock.quantity -= Number(quantity);
+        if (stock.quantity <= 0) {
+                // Remove stock from portfolio
+                user.portfolio.stocks = user.portfolio.stocks.filter(s => s.ticker !== ticker);
+        }
+        await user.save();
+        res.json({ success: true });
 });
 
 //get the users funds
@@ -279,6 +289,26 @@ app.get('/api/search/:ticker', async (req, res) => {
     } catch (err) {
         console.error('Error in /api/search:', err);
         return res.status(500).json({ success: false, message: 'Error performing search', detail: String(err) });
+    }
+});
+
+app.get('/api/quote/:ticker', async (req, res) => {
+    try {
+        const ticker = req.params.ticker;
+        if (!ticker || typeof ticker !== 'string' || ticker.length < 1) {
+            return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
+        }
+        const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(ticker)}&apikey=${process.env.API_KEY}`);
+        if (!quoteResponse.ok) {
+            throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
+        }
+        const quoteJson = await quoteResponse.json();
+        console.log('Fetched global quote:', quoteJson);
+        // Return the Global Quote object to the client in a consistent format
+        return res.json({ success: true, quote: quoteJson['Global Quote'] || quoteJson });
+    } catch (err) {
+        console.error('Error in /api/quote:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching quote', detail: String(err) });
     }
 });
 

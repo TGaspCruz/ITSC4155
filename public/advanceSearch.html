@@ -37,6 +37,14 @@
             <p id="stock-volume"></p>
             <p id="stock-change"></p>
             <p id="stock-change-percent"></p>
+            <form id="buyForm">
+                <label for="buy-quantity">Quantity</label>
+                <input id="buy-quantity" name="quantity" type="number" min="1" value="1" required />
+                <input id="buy-price" name="price" type="hidden" />
+                <input id="buy-ticker" name="ticker" type="hidden" />
+                <button type="submit" id="buyButton">Buy</button>
+            </form>
+            <p id="buyMessage" style="color: green;"></p>
         </div>
     </main>
     <script src="advanceSearch.js"></script>
