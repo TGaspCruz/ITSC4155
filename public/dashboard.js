@@ -1,9 +1,12 @@
 // Basic form display(Requires further implementation)
-document.getElementById("buyButton").style.display = "none";
+//document.getElementById("buyButton").style.display = "none";
 const buyBtn = document.getElementById("buyBtn");
 const canvas = document.getElementById("priceChart");
+const searchBtn = document.getElementById("searchBtn");
+const tickerInput = document.getElementById("ticker");
+const searchedTickerData = document.getElementById("searchedTickerPrice");
 
-function showForm(type) {
+async function showForm(type) {
     document.getElementById("form-title").textContent = type === "buy" ? "Buy Stock" : "Sell Stock";
     document.getElementById("trade-form").style.display = "block";
 }
@@ -11,6 +14,40 @@ function showForm(type) {
 function closeForm() {
     document.getElementById("trade-form").style.display = "none";
 }
+
+searchBtn.addEventListener('click', async () => {
+    try {
+        const ticker = tickerInput.value.toUpperCase();
+        console.log(ticker);
+        if (!ticker || ticker.length === 0 || ticker == "") {
+            alert("Enter a valid ticker symbol");
+            return;
+        }
+        // Real implementation
+        // const response = await fetch(`/api/quote/${ticker}`);
+        // if (!response.ok) {
+        //     throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
+        // }
+        // const stockData = await response.json();
+        // console.log(stockData);
+        // searchedTickerData.innerText = stockData["Global Quote"]["01. symbol"] + " " + stockData["Global Quote"]["05. price"].toFixed(2);
+        // Demo key for devolopment
+        const response = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
+        if (!response.ok) {
+            throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
+        }
+        const stockData = await response.json();
+        console.log(stockData);
+        searchedTickerData.innerText = stockData["Global Quote"]["01. symbol"] + " " + parseFloat(stockData["Global Quote"]["05. price"]).toFixed(2);
+        showForm("buy");
+        buyBtn.style.display = "block";
+        // Set hidden input values for form submission
+        document.getElementById("hiddenTicker").value = stockData["Global Quote"]["01. symbol"];
+        document.getElementById("hiddenPrice").value = parseFloat(stockData["Global Quote"]["05. price"]).toFixed(2);
+    } catch (error) {
+        console.error('Error fetching stock data:', error);
+    }
+})
 
 // Basic logout (Requires further implementation)
 document.getElementById('logoutBtn')?.addEventListener('click', async () => {
@@ -24,6 +61,32 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     }
 });
 
+buyBtn.addEventListener("click", function () {
+    const amount = document.getElementById("quantity").value;
+    let searchedTickerPrice2 = document.getElementById(
+        "searchedTickerPrice"
+    );
+    const num = parseFloat(searchedTickerPrice2.textContent) * amount;
+    alert("Bought $" + num + " of stock in" + tickerInput);
+});
+
+
+if (buyBtn) {
+    buyBtn.addEventListener("click", async function () {
+    const amount = document.getElementById("quantity").value; //how many shares they want to buy
+
+    const num = parseFloat(searchedTickerPrice.textContent) * amount; // the total price (share price * shares)
+
+    const data = await getFunds();
+
+    if (data.availableFunds < num) {
+        alert("Not enough money");
+    }
+
+    invested += num;
+    });
+}
+
 // Fetch data from the server and populate tables
 async function fetchStockData() {
     try {
@@ -32,7 +95,6 @@ async function fetchStockData() {
         if (!response.ok) {
             throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
         }
-        console.log(response);
         const data = await response.json();
         console.log(data);
         const gainersTable = document.getElementById('TopGainerTable');
@@ -60,7 +122,6 @@ async function fetchStockData() {
         // const top_losersArray = data.stockList.top_losers;
         // const most_actively_tradedArray = data.stockList.most_actively_traded;
         const top_gainersArray = data.top_gainers;
-        console.log(top_gainersArray);
         const top_losersArray = data.top_losers;
         const most_actively_tradedArray = data.most_actively_traded;
 
@@ -73,34 +134,34 @@ async function fetchStockData() {
     }
 }
 
-const ctx = canvas.getContext("2d");
-let portfolioValue = 0;
-let avgPrice = portfolioValue;
-let prices = [avgPrice];
+// const ctx = canvas.getContext("2d");
+// let portfolioValue = 0;
+// let avgPrice = portfolioValue;
+// let prices = [avgPrice];
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height - avgPrice);
-    for (let i = 0; i < prices.length; i++) {
-        ctx.lineTo(i * 4, canvas.height - prices[i]);
-    }
-    ctx.lineWidth = 1; // Line thickness 5px
-    ctx.strokeStyle = "green"; // Blue color line
-    ctx.lineCap = "round"; // Rounded line endpoints
-    ctx.lineJoin = "round"; // Rounded corners between lines
+// function draw() {
+//     ctx.clearRect(0, 0, canvas.width, canvas.height);
+//     ctx.beginPath();
+//     ctx.moveTo(0, canvas.height - avgPrice);
+//     for (let i = 0; i < prices.length; i++) {
+//         ctx.lineTo(i * 4, canvas.height - prices[i]);
+//     }
+//     ctx.lineWidth = 1; // Line thickness 5px
+//     ctx.strokeStyle = "green"; // Blue color line
+//     ctx.lineCap = "round"; // Rounded line endpoints
+//     ctx.lineJoin = "round"; // Rounded corners between lines
 
-    ctx.stroke();
-}
+//     ctx.stroke();
+// }
 
-function update() {
-    avgPrice = portfolioValue / 3;
-    prices.push(avgPrice);
-    if (prices.length > 100) prices.shift();
-    draw();
-}
+// function update() {
+//     avgPrice = portfolioValue / 3;
+//     prices.push(avgPrice);
+//     if (prices.length > 100) prices.shift();
+//     draw();
+// }
 
-setInterval(update, 100);
+// setInterval(update, 100);
 
 // Basic search (Requires further implementation)
 async function searchStock() {
@@ -145,118 +206,68 @@ async function searchStock() {
     }
 }
 
-buyBtn.addEventListener("click", function () {
-    const amount = document.getElementById("quantity").value;
-    let searchedTickerPrice2 = document.getElementById(
-        "searchedTickerPrice"
-);
-const num = parseFloat(searchedTickerPrice2.textContent) * amount;
-    alert("Bought $" + num + " of stock in" + tickerInput);
-});
+// async function simulateStockUpdates() {
+//     portfolioValue = 0;
+//     const res = await fetch("/api/getStocks");
+//     const data = await res.json();
+//     if (data.success) {
+//         data.stocks.forEach((stock) => {
+//         stock.avgPrice += Math.random() - 0.5; // Random walk
+//         console.log(`Updated ${stock.ticker} to ${stock.avgPrice}`);
+//         });
+//         data.stocks.forEach((stock) => {
+//         portfolioValue += stock.quantity * stock.avgPrice;
 
-document.addEventListener("DOMContentLoaded", () => {
-    const searchBtn = document.getElementById("searchBtn");
-    if (searchBtn) {
-        searchBtn.addEventListener("click", searchStock);
-    }
+//         fetch("/api/updatePrice", {
+//             method: "POST",
+//             headers: {
+//             "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({
+//             ticker: stock.ticker,
+//             price: stock.avgPrice.toFixed(2),
+//             }),
+//         })
+//             .then((response) => response.json())
+//             .then((data) => {
+//             console.log(data);
+//             });
 
-    const buyButton = document.getElementById("buyButton");
-    if (buyButton) {
-        buyButton.addEventListener("click", () => showForm("buy"));
-    }
+//         if (portfolioValue > invested) {
+//             document.getElementById("portfolio-value").textContent =
+//             "Portfolio Value: $" +
+//             portfolioValue.toFixed(2) +
+//             "🤑" +
+//             (portfolioValue / invested).toFixed(2) +
+//             "%";
+//         } else
+//             document.getElementById("portfolio-value").textContent =
+//             "Portfolio Value: $" +
+//             portfolioValue.toFixed(2) +
+//             "😭" +
+//             (portfolioValue / invested).toFixed(2) +
+//             "%";
+//         });
+//     }
+// }
 
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", async () => {
-        try {
-            const response = await fetch("/logout", { method: "POST" });
-            window.location.href = "/";
-        } catch (err) {
-            console.error("Logout failed", err);
-            window.location.href = "/";
-        }
-    });
-}
+// setInterval(simulateStockUpdates, 1000); // Update every 5 seconds
 
-if (buyBtn) {
-    buyBtn.addEventListener("click", async function () {
-    const amount = document.getElementById("quantity").value; //how many shares they want to buy
+// async function getFunds() {
+//     const res = await fetch("/api/getFunds");
+//     const data = await res.json();
+//     if (data.success) {
+//     document.getElementById("available-funds-buy").textContent =
+//         "Available funds: " + data.availableFunds;
 
-    const num = parseFloat(searchedTickerPrice.textContent) * amount; // the total price (share price * shares)
+//     invested = 1000 - data.availableFunds;
+//     document.getElementById("invested").textContent =
+//         "Invested " + "$" + invested.toFixed(2);
+//     } else {
+//     console.error("Failed to fetch funds:", data.message);
+//     }
+// }
 
-    const data = await getFunds();
-
-    if (data.availableFunds < num) {
-        alert("Not enough money");
-    }
-
-    invested += num;
-    });
-}
-});
-
-async function simulateStockUpdates() {
-    portfolioValue = 0;
-    const res = await fetch("/api/getStocks");
-    const data = await res.json();
-    if (data.success) {
-        data.stocks.forEach((stock) => {
-        stock.avgPrice += Math.random() - 0.5; // Random walk
-        console.log(`Updated ${stock.ticker} to ${stock.avgPrice}`);
-        });
-        data.stocks.forEach((stock) => {
-        portfolioValue += stock.quantity * stock.avgPrice;
-
-        fetch("/api/updatePrice", {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-            ticker: stock.ticker,
-            price: stock.avgPrice.toFixed(2),
-            }),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-            console.log(data);
-            });
-
-        if (portfolioValue > invested) {
-            document.getElementById("portfolio-value").textContent =
-            "Portfolio Value: $" +
-            portfolioValue.toFixed(2) +
-            "🤑" +
-            (portfolioValue / invested).toFixed(2) +
-            "%";
-        } else
-            document.getElementById("portfolio-value").textContent =
-            "Portfolio Value: $" +
-            portfolioValue.toFixed(2) +
-            "😭" +
-            (portfolioValue / invested).toFixed(2) +
-            "%";
-        });
-    }
-}
-
-setInterval(simulateStockUpdates, 1000); // Update every 5 seconds
-
-async function getFunds() {
-    const res = await fetch("/api/getFunds");
-    const data = await res.json();
-    if (data.success) {
-    document.getElementById("available-funds-buy").textContent =
-        "Available funds: " + data.availableFunds;
-
-    invested = 1000 - data.availableFunds;
-    document.getElementById("invested").textContent =
-        "Invested " + "$" + invested.toFixed(2);
-    } else {
-    console.error("Failed to fetch funds:", data.message);
-    }
-}
-
-getFunds();
-setInterval(getFunds, 2000);
+// getFunds();
+// setInterval(getFunds, 2000);
 window.onload = fetchStockData;

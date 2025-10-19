@@ -23,20 +23,31 @@
                 <input type="text" id="input-box" placeholder="Enter stock ticker" autocomplete="off" maxlength="5">
                 <button id="searchButton"><i class="fa fa-search"></i></button>
             </div>
-            <div id="searchResults">
+            <div id="searchResults" style="display: none">
                 <!-- Search results will be displayed here -->
                  <ul id="result-list"></ul>
             </div>
         </div>
         <div class="stock-container" style="display: none">
-            <h2 id="stock-symbol"></h2>
-            <p id="stock-open"></p>
-            <p id="stock-high"></p>
-            <p id="stock-low"></p>
-            <p id="stock-price"></p>
-            <p id="stock-volume"></p>
-            <p id="stock-change"></p>
-            <p id="stock-change-percent"></p>
+            <div class="stock-details">
+                <h2 id="stock-symbol"></h2>
+                <p id="stock-open"></p>
+                <p id="stock-high"></p>
+                <p id="stock-low"></p>
+                <p id="stock-price"></p>
+                <p id="stock-volume"></p>
+                <p id="stock-change"></p>
+                <p id="stock-change-percent"></p>
+            </div>
+            <form id="trade-form">
+                <input type="hidden" id="trade-ticker" name="ticker">
+                <input type="hidden" id="trade-price" name="price">
+                <label for="trade-quantity">Quantity:</label>
+                <input id="trade-quantity" name="quantity" type="number" min="1" value="1" required>
+                <button type="submit" id="buyBtn">Buy</button>
+                <button type="button" id="sellBtn">Sell</button>
+                <p id="trade-message" style="margin-top:.5rem;"></p>
+            </form>
         </div>
     </main>
     <script src="advanceSearch.js"></script>

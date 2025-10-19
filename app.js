@@ -282,6 +282,25 @@ app.get('/api/search/:ticker', async (req, res) => {
     }
 });
 
+app.get('/api/quote/:ticker', async (req, res) => {
+    try {
+        const ticker = req.params.ticker;
+        if (!ticker || typeof ticker !== 'string' || ticker.length < 1) {
+            return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
+        }
+        const searchResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.API_KEY}`);
+        if (!searchResponse.ok) {
+            throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
+        }
+        const searchJson = await searchResponse.json();
+        console.log('Fetched search results:', searchJson);
+        return res.json({ success: true, results: searchJson });
+    } catch (error) {
+        console.error('Error in /api/quote/', err);
+        return res.status(500).json({ success: false, message: 'Error performing search', detail: String(err) });
+    }
+});
+
 app.post("/api/updatePrice", async (req, res) => {
     const stockId = req.body.ticker;
     const newPrice = req.body.price;
