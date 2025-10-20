@@ -1,44 +1,44 @@
 // Fetch current prices for all stocks
-async function fetchCurrentPrices(stocks) {
-    const prices = {};
-    for (const stock of stocks) {
-        try {
-            const response = await fetch(`/api/quote/${stock.ticker}`);
-            const data = await response.json();
-            if (data.success && data.quote) {
-                prices[stock.ticker] = parseFloat(data.quote['05. price'] || data.quote.price || 0);
-            }
-        } catch (error) {
-            console.error(`Error fetching price for ${stock.ticker}:`, error);
-        }
-    }
-    return prices;
-}
+// async function fetchCurrentPrices(stocks) {
+//     const prices = {};
+//     for (const stock of stocks) {
+//         try {
+//             const response = await fetch(`/api/quote/${stock.ticker}`);
+//             const data = await response.json();
+//             if (data.success && data.quote) {
+//                 prices[stock.ticker] = parseFloat(data.quote['05. price'] || data.quote.price || 0);
+//             }
+//         } catch (error) {
+//             console.error(`Error fetching price for ${stock.ticker}:`, error);
+//         }
+//     }
+//     return prices;
+// }
 
 // Calculate portfolio statistics
-function calculatePortfolioStats(stocks, currentPrices) {
-    let totalValue = 0;
-    let totalInvestment = 0;
+// function calculatePortfolioStats(stocks, currentPrices) {
+//     let totalValue = 0;
+//     let totalInvestment = 0;
     
-    stocks.forEach(stock => {
-        const currentPrice = currentPrices[stock.ticker] || stock.avgPrice;
-        const investment = stock.quantity * stock.avgPrice;
-        const currentValue = stock.quantity * currentPrice;
+//     stocks.forEach(stock => {
+//         const currentPrice = currentPrices[stock.ticker] || stock.avgPrice;
+//         const investment = stock.quantity * stock.avgPrice;
+//         const currentValue = stock.quantity * currentPrice;
         
-        totalValue += currentValue;
-        totalInvestment += investment;
-    });
+//         totalValue += currentValue;
+//         totalInvestment += investment;
+//     });
     
-    const totalGainLoss = totalValue - totalInvestment;
-    const gainLossPercent = totalInvestment ? (totalGainLoss / totalInvestment) * 100 : 0;
+//     const totalGainLoss = totalValue - totalInvestment;
+//     const gainLossPercent = totalInvestment ? (totalGainLoss / totalInvestment) * 100 : 0;
     
-    return {
-        totalValue,
-        totalInvestment,
-        totalGainLoss,
-        gainLossPercent
-    };
-}
+//     return {
+//         totalValue,
+//         totalInvestment,
+//         totalGainLoss,
+//         gainLossPercent
+//     };
+// }
 
 // Fetch and display logged in user portfolio data
 async function loadPortfolio() {
@@ -48,47 +48,44 @@ async function loadPortfolio() {
             if (res.status === 401) window.location.href = '/';
             throw new Error(`HTTP ${res.status}`);
         }
-        const payload = await res.json();
-        if (!payload.success) throw new Error(payload.message || 'API error');
-
-        document.getElementById('username').textContent = `${payload.username}'s Portfolio`;
-        document.getElementById('available-funds').textContent = `$${(payload.portfolio.availableFunds || 0).toFixed(2)}`;
+        const user = await res.json();
+        if (!user.success) throw new Error(user.message || 'API error');
 
         const tbody = document.getElementById('holdings-body');
         tbody.innerHTML = '';
-        const stocks = payload.portfolio.stocks || [];
+        const stocks = user.portfolio.stocks || [];
         if (!stocks.length) {
+            document.getElementById('username').textContent = `${user.username}'s Portfolio`;
+            document.getElementById('available-funds').textContent = `$${(user.portfolio.availableFunds || 0).toFixed(2)}`;
+            document.getElementById('total-invested').textContent = `$0.00`;
             tbody.innerHTML = '<tr><td colspan="7">No Stock holdings</td></tr>';
             return;
         }
 
         // Fetch current prices for all stocks
-        const currentPrices = await fetchCurrentPrices(stocks);
-        const stats = calculatePortfolioStats(stocks, currentPrices);
+        //const currentPrices = await fetchCurrentPrices(stocks);
+        //const stats = calculatePortfolioStats(stocks, currentPrices);
 
         // Update portfolio summary
-        document.getElementById('total-invested').textContent = `$${stats.totalInvestment.toFixed(2)}`;
-        document.getElementById('portfolio-value').textContent = `$${stats.totalValue.toFixed(2)}`;
-        const gainLossEl = document.getElementById('total-gain-loss');
-        gainLossEl.textContent = `$${stats.totalGainLoss.toFixed(2)} (${stats.gainLossPercent.toFixed(2)}%)`;
-        gainLossEl.className = stats.totalGainLoss >= 0 ? 'gain' : 'loss';
-
+        //document.getElementById('total-invested').textContent = `$${stats.totalInvestment.toFixed(2)}`;
+        //document.getElementById('portfolio-value').textContent = `$${stats.totalValue.toFixed(2)}`;
+        //const gainLossEl = document.getElementById('total-gain-loss');
+        //gainLossEl.textContent = `$${stats.totalGainLoss.toFixed(2)} (${stats.gainLossPercent.toFixed(2)}%)`;
+        //gainLossEl.className = stats.totalGainLoss >= 0 ? 'gain' : 'loss';
+        let totalInvestment = 0;
         stocks.forEach(stock => {
             const tr = document.createElement('tr');
-            const currentPrice = currentPrices[stock.ticker] || stock.avgPrice;
-            const marketValue = stock.quantity * currentPrice;
-            const gainLoss = marketValue - (stock.quantity * stock.avgPrice);
-            const gainLossPercent = ((currentPrice - stock.avgPrice) / stock.avgPrice) * 100;
+            //const currentPrice = currentPrices[stock.ticker] || stock.avgPrice;
+            const totalStockValue = stock.quantity * stock.avgPrice;
+            totalInvestment += totalStockValue;
+            //const gainLoss = totalStockValue - (stock.quantity * stock.avgPrice);
+            //const gainLossPercent = ((currentPrice - stock.avgPrice) / stock.avgPrice) * 100;
             
             tr.innerHTML = `
                 <td>${stock.ticker}</td>
                 <td>${stock.quantity}</td>
                 <td>$${(stock.avgPrice || 0).toFixed(2)}</td>
-                <td>$${currentPrice.toFixed(2)}</td>
-                <td>$${marketValue.toFixed(2)}</td>
-                <td class="${gainLoss >= 0 ? 'gain' : 'loss'}">
-                    $${gainLoss.toFixed(2)} (${gainLossPercent.toFixed(2)}%)
-                </td>
+                <td>$${totalStockValue.toFixed(2)}</td>
                 <td class="sell-actions">
                     <div class="sell-controls" style="display: none;">
                         <input type="number" class="sell-quantity" 
@@ -129,8 +126,8 @@ async function loadPortfolio() {
             // Validate quantity input
             quantityInput.addEventListener('change', () => {
                 const value = parseInt(quantityInput.value);
-                if (value < 1) quantityInput.value = 1;
-                if (value > stock.quantity) quantityInput.value = stock.quantity;
+                //if (value < 1) quantityInput.value = 1;
+                //if (value > stock.quantity) quantityInput.value = stock.quantity;
             });
 
             // Handle confirm sell
@@ -167,6 +164,9 @@ async function loadPortfolio() {
                 }
             });
         });
+        document.getElementById('username').textContent = `${user.username}'s Portfolio`;
+        document.getElementById('available-funds').textContent = `$${(user.portfolio.availableFunds || 0).toFixed(2)}`;
+        document.getElementById('total-invested').textContent = `$${totalInvestment}`;
     } catch (err) {
         console.error('Failed to load portfolio', err);
         document.getElementById('holdings-body').innerHTML = '<tr><td colspan="5">Error loading portfolio</td></tr>';
@@ -188,20 +188,20 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
 });
 
 // Get and display available funds
-async function getFunds() {
-    try {
-        const res = await fetch("/api/getFunds");
-        const data = await res.json();
-        if (data.success) {
-            document.getElementById("available-funds").textContent = 
-                `$${(data.availableFunds || 0).toFixed(2)}`;
-        } else {
-            console.error("Failed to fetch funds:", data.message);
-        }
-    } catch (error) {
-        console.error("Error fetching funds:", error);
-    }
-}
+// async function getFunds() {
+//     try {
+//         const res = await fetch("/api/getFunds");
+//         const data = await res.json();
+//         if (data.success) {
+//             document.getElementById("available-funds").textContent = 
+//                 `$${(data.availableFunds || 0).toFixed(2)}`;
+//         } else {
+//             console.error("Failed to fetch funds:", data.message);
+//         }
+//     } catch (error) {
+//         console.error("Error fetching funds:", error);
+//     }
+// }
 
-// Load funds on page load
-window.addEventListener("load", getFunds);
+// // Load funds on page load
+// window.addEventListener("load", getFunds);

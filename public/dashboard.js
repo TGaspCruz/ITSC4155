@@ -4,7 +4,11 @@ const buyBtn = document.getElementById("buyBtn");
 const canvas = document.getElementById("priceChart");
 const searchBtn = document.getElementById("searchBtn");
 const tickerInput = document.getElementById("ticker");
-const searchedTickerData = document.getElementById("searchedTickerPrice");
+const searchedTickerPrice = document.getElementById("searchedTickerPrice");
+const stockTicker = document.getElementById("hiddenTicker");
+const stockPrice = document.getElementById("hiddenPrice");
+const availableFundsBuy = document.getElementById("available-funds-buy");
+let usersAvailableFunds = 0;
 
 async function showForm(type) {
     document.getElementById("form-title").textContent = type === "buy" ? "Buy Stock" : "Sell Stock";
@@ -19,31 +23,53 @@ searchBtn.addEventListener('click', async () => {
     try {
         const ticker = tickerInput.value.toUpperCase();
         console.log(ticker);
-        if (!ticker || ticker.length === 0 || ticker == "") {
-            alert("Enter a valid ticker symbol");
+        if (!ticker || ticker.length === 0 || ticker == "" || ticker.trim().length === 0) {
+            alert("Enter a ticker symbol");
             return;
         }
         // Real implementation
-        // const response = await fetch(`/api/quote/${ticker}`);
-        // if (!response.ok) {
-        //     throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
-        // }
-        // const stockData = await response.json();
-        // console.log(stockData);
-        // searchedTickerData.innerText = stockData["Global Quote"]["01. symbol"] + " " + stockData["Global Quote"]["05. price"].toFixed(2);
-        // Demo key for devolopment
-        const response = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
+        const response = await fetch(`/api/quote/${ticker}`);
         if (!response.ok) {
             throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
         }
         const stockData = await response.json();
         console.log(stockData);
-        searchedTickerData.innerText = stockData["Global Quote"]["01. symbol"] + " " + parseFloat(stockData["Global Quote"]["05. price"]).toFixed(2);
+        console.log(!stockData);
+        console.log(!stockData.success);
+        if (!stockData || !stockData.success) {
+            alert(`${stockData.message}`);
+            return;
+        }
+        console.log(stockData);
+        searchedTickerPrice.innerText = `Ticker: ${stockData.quote["01. symbol"]} Price: ${parseFloat(stockData.quote["05. price"]).toFixed(2)}
+                                        High: ${parseFloat(stockData.quote["03. high"]).toFixed(2)} Low: ${parseFloat(stockData.quote["04. low"]).toFixed(2)}`;
+        // Demo key for devolopment
+        // const response = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
+        // if (!response.ok) {
+        //     throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
+        // }
+        // const stockData = await response.json();
+        // console.log(stockData);
+        // if (!stockData || !stockData["Global Quote"]) {
+        //     alert("Stock symbol not found");
+        //     return;
+        // }
+        const availableFundsResponse = await fetch('api/getFunds');
+        if (!availableFundsResponse.ok) {
+            throw new Error(`Unable to make recieve funds`);
+        }
+        const availableFundsJson = await availableFundsResponse.json();
+        console.log(availableFundsJson);
+        // searchedTickerPrice.innerText = `Ticker: ${stockData["Global Quote"]["01. symbol"]} Price: ${parseFloat(stockData["Global Quote"]["05. price"]).toFixed(2)}
+        //                                 High: ${parseFloat(stockData["Global Quote"]["03. high"]).toFixed(2)} Low: ${parseFloat(stockData["Global Quote"]["04. low"]).toFixed(2)}`;
+        availableFundsBuy.textContent = `Available Funds: $${availableFundsJson.availableFunds.toFixed(2)}`;
+        usersAvailableFunds = availableFundsJson.availableFunds.toFixed(2);
         showForm("buy");
-        buyBtn.style.display = "block";
         // Set hidden input values for form submission
-        document.getElementById("hiddenTicker").value = stockData["Global Quote"]["01. symbol"];
-        document.getElementById("hiddenPrice").value = parseFloat(stockData["Global Quote"]["05. price"]).toFixed(2);
+        stockTicker.value = stockData.quote["01. symbol"];
+        stockPrice.value = parseFloat(stockData.quote["05. price"]).toFixed(2);
+        // stockTicker.value = stockData["Global Quote"]["01. symbol"];
+        // stockPrice.value = parseFloat(stockData["Global Quote"]["05. price"]).toFixed(2);
     } catch (error) {
         console.error('Error fetching stock data:', error);
     }
@@ -61,31 +87,73 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     }
 });
 
-buyBtn.addEventListener("click", function () {
-    const amount = document.getElementById("quantity").value;
-    let searchedTickerPrice2 = document.getElementById(
-        "searchedTickerPrice"
-    );
-    const num = parseFloat(searchedTickerPrice2.textContent) * amount;
-    alert("Bought $" + num + " of stock in" + tickerInput);
+// buyBtn.addEventListener("click", async function () {
+//     try {
+//         const amount = document.getElementById("quantity").value;
+//         console.log(amount);
+//         const num = parseFloat(stockPrice) * amount;
+//         if (usersAvailableFunds < num) {
+//             alert("Not enough funds")
+//             return;
+//         }
+//         alert("Bought $" + num + " of stock in" + tickerInput);
+//     } catch (err) {
+//         console.log(err);
+//     }
+// });
+
+document.getElementById('trade-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const qty = Number(document.getElementById('quantity').value);
+    const price = Number(document.getElementById('hiddenPrice').value);
+    const ticker = document.getElementById('hiddenTicker').value;
+    const buyMessage = document.getElementById('trade-message');
+    buyMessage.textContent = '';
+
+    if (!ticker || !price || !qty || qty <= 0) {
+        buyMessage.style.color = 'red';
+        buyMessage.textContent = 'Invalid buy parameters';
+        return;
+    }
+
+    try {
+        const resp = await fetch('/api/buyStock', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticker, price, quantity: qty })
+        });
+        const payload = await resp.json();
+        if (!resp.ok || !payload.success) {
+            buyMessage.style.color = 'red';
+            buyMessage.textContent = payload.message || 'Purchase failed';
+            return;
+        }
+        buyMessage.style.color = 'green';
+        buyMessage.textContent = 'Purchase successful';
+        availableFundsBuy.textContent = `Available Funds: $${payload.availableFunds.toFixed(2)}`;
+    } catch (err) {
+        console.error('Buy request failed', err);
+        buyMessage.style.color = 'red';
+        buyMessage.textContent = 'Network error during purchase';
+    }
 });
 
 
-if (buyBtn) {
-    buyBtn.addEventListener("click", async function () {
-    const amount = document.getElementById("quantity").value; //how many shares they want to buy
+// if (buyBtn) {
+//     buyBtn.addEventListener("click", async function () {
+//     const amount = document.getElementById("quantity").value; //how many shares they want to buy
 
-    const num = parseFloat(searchedTickerPrice.textContent) * amount; // the total price (share price * shares)
+//     const num = parseFloat(searchedTickerPrice.textContent) * amount; // the total price (share price * shares)
 
-    const data = await getFunds();
+//     const data = await getFunds();
 
-    if (data.availableFunds < num) {
-        alert("Not enough money");
-    }
+//     if (data.availableFunds < num) {
+//         alert("Not enough money");
+//     }
 
-    invested += num;
-    });
-}
+//     invested += num;
+//     });
+// }
 
 // Fetch data from the server and populate tables
 async function fetchStockData() {
@@ -164,47 +232,41 @@ async function fetchStockData() {
 // setInterval(update, 100);
 
 // Basic search (Requires further implementation)
-async function searchStock() {
-    const searchedTickerPrice = document.getElementById(
-        "searchedTickerPrice"
-    );
-    const tickerInput = document
-        .getElementById("ticker")
-        .value.toUpperCase();
-    //const response = await fetch(
-    //  "https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=YOUR_API_KEY"
-    //);
-    //const json = await response.json();
-    //console.log(JSON.stringify(json));
+// async function searchStock() {
+//     //const response = await fetch(
+//     //  "https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=YOUR_API_KEY"
+//     //);
+//     //const json = await response.json();
+//     //console.log(JSON.stringify(json));
 
-    console.log(JSON.stringify(json));
+//     console.log(JSON.stringify(json));
 
-    const ticker = document.getElementById("ticker").value.toUpperCase();
-    if (ticker) {
-        const topGainers = json.top_gainers;
+//     const ticker = document.getElementById("ticker").value.toUpperCase();
+//     if (ticker) {
+//         const topGainers = json.top_gainers;
 
-        for (let i = 0; i < topGainers.length; i++) {
-        if (topGainers[i].ticker === ticker) {
-            console.log(
-            `Found ticker ${ticker} with price: ${topGainers[i].price}`
-            );
+//         for (let i = 0; i < topGainers.length; i++) {
+//         if (topGainers[i].ticker === ticker) {
+//             console.log(
+//             `Found ticker ${ticker} with price: ${topGainers[i].price}`
+//             );
 
-            searchedTickerPrice.textContent = topGainers[i].price;
+//             searchedTickerPrice.textContent = topGainers[i].price;
 
-            document.getElementById("buyButton").style.display = "block";
+//             document.getElementById("buyButton").style.display = "block";
 
-            // Set hidden input values for form submission
-            document.getElementById("hiddenTicker").value = tickerInput;
-            document.getElementById("hiddenPrice").value =
-            topGainers[i].price;
+//             // Set hidden input values for form submission
+//             document.getElementById("hiddenTicker").value = tickerInput;
+//             document.getElementById("hiddenPrice").value =
+//             topGainers[i].price;
 
-            break; // Stop the loop once found
-        }
-        }
-    } else {
-        alert("Please enter a stock ticker.");
-    }
-}
+//             break; // Stop the loop once found
+//         }
+//         }
+//     } else {
+//         alert("Please enter a stock ticker.");
+//     }
+// }
 
 // async function simulateStockUpdates() {
 //     portfolioValue = 0;
@@ -257,12 +319,9 @@ async function searchStock() {
 //     const res = await fetch("/api/getFunds");
 //     const data = await res.json();
 //     if (data.success) {
-//     document.getElementById("available-funds-buy").textContent =
-//         "Available funds: " + data.availableFunds;
-
-//     invested = 1000 - data.availableFunds;
-//     document.getElementById("invested").textContent =
-//         "Invested " + "$" + invested.toFixed(2);
+//         document.getElementById("available-funds-buy").textContent = "Available funds: " + data.availableFunds;
+//         invested = 1000 - data.availableFunds;
+//         document.getElementById("invested").textContent = "Invested " + "$" + invested.toFixed(2);
 //     } else {
 //     console.error("Failed to fetch funds:", data.message);
 //     }

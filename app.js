@@ -5,23 +5,15 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 const User = require("./models/user.model");
 
-mongoose
-  .connect("mongodb://127.0.0.1/InvestmentProjectDB")
-  .then(() => {
-    console.log("Database is connected successfully");
-  })
-  .catch((error) => console.log(error));
+mongoose.connect("mongodb://127.0.0.1/InvestmentProjectDB")
+    .then(() => {
+        console.log("Database is connected successfully");
+    })
+    .catch((error) => console.log(error));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(
-  session({
-    secret: process.env.SECRET_KEY,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
-
+app.use(session({ secret: process.env.SECRET_KEY, resave: false, saveUninitialized: true}));
 // Serve static files after session middleware so the middleware above can protect specific files
 app.use(express.static("public"));
 
@@ -49,11 +41,6 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ success: false, message: 'Incorrect password' });
         }
         req.session.user = {username: user.username, email: user.email};
-        // const user = await User.findOne({ email: email, password: password });
-        // if (!user) {
-        //     return res.status(401).json({ success: false, message: 'Email not associated with account or incorrect password' });
-        // }
-        // req.session.user = {username: user.username, email: user.email};
         return res.status(200).json({ success: true, message: 'Login successful', redirect: '/dashboard' });
     } catch (error) {
         console.error('Error in /login:', error);
@@ -64,7 +51,6 @@ app.post('/login', async (req, res) => {
 app.post("/register", (req, res) => {
     const { username, email, password } = req.body;
     console.log("Register payload:", req.body);
-
     // Basic validation
     if (!username || !email || !password) {
         return res.status(400).json({
@@ -72,7 +58,6 @@ app.post("/register", (req, res) => {
             message: "username, email and password are required",
         });
     }
-
     // email pattern check
     const emailRegex = /.+@.+\..+/;
     if (!emailRegex.test(email)) {
@@ -83,7 +68,6 @@ app.post("/register", (req, res) => {
             message: "Please enter a valid email address" 
         });
     }
-
     // password length check
     if (password.length < 8) {
         return res.status(400).json({
@@ -91,7 +75,7 @@ app.post("/register", (req, res) => {
             message: "Password must be at least 8 characters",
         });
     }
-
+    // new user from given data in form
     const newUser = new User({
         username,
         email,
@@ -116,9 +100,7 @@ app.post("/register", (req, res) => {
         console.error("Error in /register:", err);
         // Duplicate key (unique email) error from Mongo
         if (err && err.code === 11000) {
-            return res
-            .status(409)
-            .json({ 
+            return res.status(409).json({ 
                 success: false, 
                 message: "Email already in use" 
             });
@@ -196,7 +178,7 @@ app.post("/api/buyStock", async (req, res) => {
         user.portfolio.stocks.push({ ticker, quantity: Number(quantity), avgPrice: Number(price) });
     }
     await user.save();
-    res.json({ success: true });
+    res.json({ success: true, message: "Successful buy", availableFunds: user.portfolio.availableFunds });
 });
 
 app.post("/api/sellStock", async (req, res) => {
@@ -209,7 +191,7 @@ app.post("/api/sellStock", async (req, res) => {
 
         let stock = user.portfolio.stocks.find(s => s.ticker === ticker);
         if (!stock || stock.quantity < quantity) {
-                return res.status(400).json({ success: false, message: "Not enough stock to sell" });
+            return res.status(400).json({ success: false, message: "Not enough stock to sell" });
         }
 
         // Calculate total sale value
@@ -223,7 +205,7 @@ app.post("/api/sellStock", async (req, res) => {
                 user.portfolio.stocks = user.portfolio.stocks.filter(s => s.ticker !== ticker);
         }
         await user.save();
-        res.json({ success: true });
+        res.json({ success: true, message: "Successful sell"});
 });
 
 //get the users funds
@@ -231,21 +213,14 @@ app.get("/api/getFunds", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ success: false, message: "Not logged in" });
   }
-
   try {
     const user = await User.findOne({ email: req.session.user.email });
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
-
-    return res.json({
-      success: true,
-      availableFunds: user.portfolio.availableFunds,
-    })
+    return res.json({success: true, availableFunds: user.portfolio.availableFunds})
   } catch (error) {
-    return;
+    return res.status(500).json({ success: false, message: "Server failure"});
   }
 });
 
@@ -260,7 +235,7 @@ app.get('/api/user', async (req, res) => {
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-        return res.json({ success: true, username: user.username, email: user.email, portfolio: user.portfolio });
+        return res.json({ success: true, username: user.username, portfolio: user.portfolio });
     } catch (err) {
         console.error('Error in /api/user:', err);
         return res.status(500).json({ success: false, message: 'Error fetching user data', detail: String(err) });
@@ -283,9 +258,9 @@ app.get('/api/search/:ticker', async (req, res) => {
         if (!searchResponse.ok) {
             throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
         }
-        const searchJson = await searchResponse.json();
-        console.log('Fetched search results:', searchJson);
-        return res.json({ success: true, results: searchJson.bestMatches || [] });
+        const stockListMatches = await searchResponse.json();
+        console.log('Fetched search results:', stockListMatches);
+        return res.json({ success: true, bestMatches: stockListMatches.bestMatches || [] });
     } catch (err) {
         console.error('Error in /api/search:', err);
         return res.status(500).json({ success: false, message: 'Error performing search', detail: String(err) });
@@ -298,14 +273,16 @@ app.get('/api/quote/:ticker', async (req, res) => {
         if (!ticker || typeof ticker !== 'string' || ticker.length < 1) {
             return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
         }
-        const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(ticker)}&apikey=${process.env.API_KEY}`);
+        const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.API_KEY}`);
         if (!quoteResponse.ok) {
             throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
         }
         const quoteJson = await quoteResponse.json();
+        if (!quoteJson || Object.keys(quoteJson['Global Quote']).length === 0) {
+            return res.json({ success: false, message: "Ticker Symbol Not Found "});
+        }
         console.log('Fetched global quote:', quoteJson);
-        // Return the Global Quote object to the client in a consistent format
-        return res.json({ success: true, quote: quoteJson['Global Quote'] || quoteJson });
+        return res.json({ success: true, quote: quoteJson['Global Quote']});
     } catch (err) {
         console.error('Error in /api/quote:', err);
         return res.status(500).json({ success: false, message: 'Error fetching quote', detail: String(err) });

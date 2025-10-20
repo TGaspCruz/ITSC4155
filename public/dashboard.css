@@ -181,6 +181,11 @@ th {
     padding: 3px 8px;
     cursor: pointer;
 }
+.sell-button {
+    background-color: #ff0000;
+    color: white;
+    border: none;
+}
 .confirm-sell {
     background-color: #4CAF50;
     color: white;

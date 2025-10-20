@@ -39,13 +39,12 @@
                 <p id="stock-change"></p>
                 <p id="stock-change-percent"></p>
             </div>
-            <form id="trade-form">
+            <form id="trade-form" action="/api/buyStock" method="POST">
                 <input type="hidden" id="trade-ticker" name="ticker">
                 <input type="hidden" id="trade-price" name="price">
                 <label for="trade-quantity">Quantity:</label>
                 <input id="trade-quantity" name="quantity" type="number" min="1" value="1" required>
-                <button type="submit" id="buyBtn">Buy</button>
-                <button type="button" id="sellBtn">Sell</button>
+                <button type="submit" id="buyBtn" style="background-color: green;">Buy</button>
                 <p id="trade-message" style="margin-top:.5rem;"></p>
             </form>
         </div>
