@@ -122,7 +122,9 @@ app.post("/register", (req, res) => {
 
 app.get("/api/stockList", async (req, res) => {
   try {
-    const stockListResponse = await fetch(`https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${process.env.API_KEY}`);
+    // Demokey
+    const stockListResponse = await fetch("https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=demo");
+    // const stockListReRponse = await fetch(`https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${process.env.API_KEY}`);
     if (!stockListResponse.ok) {
       throw new Error(`AlphaVantage HTTP ${stockListResponse.status}`);
     }
@@ -143,11 +145,11 @@ app.get("/api/stockList", async (req, res) => {
 app.post("/logout", (req, res) => {
     req.session.destroy((err) => {
         if (err) {
-        console.error("Error destroying session:", err);
-        return res.status(500).json({ success: false, message: "Logout failed" });
+            console.error("Error destroying session:", err);
+            return res.status(500).json({ success: false, message: "Logout failed", redirect: '/'});
         }
         res.clearCookie && res.clearCookie("connect.sid");
-        return res.json({ success: true, message: "Logged out" });
+        return res.json({ success: true, message: "Logged out", redirect: '/'});
     });
 });
 
@@ -254,7 +256,9 @@ app.get('/api/search/:ticker', async (req, res) => {
         if (!ticker || typeof ticker !== 'string' || ticker.length < 1) {
             return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
         }
-        const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`);
+        // Demo Key
+        const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=tesco&apikey=demo`);
+        //const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`);
         if (!searchResponse.ok) {
             throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
         }
@@ -273,7 +277,9 @@ app.get('/api/quote/:ticker', async (req, res) => {
         if (!ticker || typeof ticker !== 'string' || ticker.length < 1) {
             return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
         }
-        const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.API_KEY}`);
+        // Demo Key
+        const quoteResponse = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
+        //const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.API_KEY}`);
         if (!quoteResponse.ok) {
             throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
         }

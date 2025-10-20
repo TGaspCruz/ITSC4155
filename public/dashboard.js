@@ -43,33 +43,18 @@ searchBtn.addEventListener('click', async () => {
         console.log(stockData);
         searchedTickerPrice.innerText = `Ticker: ${stockData.quote["01. symbol"]} Price: ${parseFloat(stockData.quote["05. price"]).toFixed(2)}
                                         High: ${parseFloat(stockData.quote["03. high"]).toFixed(2)} Low: ${parseFloat(stockData.quote["04. low"]).toFixed(2)}`;
-        // Demo key for devolopment
-        // const response = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
-        // if (!response.ok) {
-        //     throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
-        // }
-        // const stockData = await response.json();
-        // console.log(stockData);
-        // if (!stockData || !stockData["Global Quote"]) {
-        //     alert("Stock symbol not found");
-        //     return;
-        // }
         const availableFundsResponse = await fetch('api/getFunds');
         if (!availableFundsResponse.ok) {
             throw new Error(`Unable to make recieve funds`);
         }
         const availableFundsJson = await availableFundsResponse.json();
         console.log(availableFundsJson);
-        // searchedTickerPrice.innerText = `Ticker: ${stockData["Global Quote"]["01. symbol"]} Price: ${parseFloat(stockData["Global Quote"]["05. price"]).toFixed(2)}
-        //                                 High: ${parseFloat(stockData["Global Quote"]["03. high"]).toFixed(2)} Low: ${parseFloat(stockData["Global Quote"]["04. low"]).toFixed(2)}`;
         availableFundsBuy.textContent = `Available Funds: $${availableFundsJson.availableFunds.toFixed(2)}`;
         usersAvailableFunds = availableFundsJson.availableFunds.toFixed(2);
         showForm("buy");
         // Set hidden input values for form submission
         stockTicker.value = stockData.quote["01. symbol"];
         stockPrice.value = parseFloat(stockData.quote["05. price"]).toFixed(2);
-        // stockTicker.value = stockData["Global Quote"]["01. symbol"];
-        // stockPrice.value = parseFloat(stockData["Global Quote"]["05. price"]).toFixed(2);
     } catch (error) {
         console.error('Error fetching stock data:', error);
     }
@@ -158,8 +143,7 @@ document.getElementById('trade-form')?.addEventListener('submit', async (e) => {
 // Fetch data from the server and populate tables
 async function fetchStockData() {
     try {
-        //const response = await fetch('/api/stockList');
-        const response = await fetch("https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=demo")
+        const response = await fetch('/api/stockList');
         if (!response.ok) {
             throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
         }
@@ -186,12 +170,9 @@ async function fetchStockData() {
             });
             table.innerHTML = html;
         }
-        // const top_gainersArray = data.stockList.top_gainers;
-        // const top_losersArray = data.stockList.top_losers;
-        // const most_actively_tradedArray = data.stockList.most_actively_traded;
-        const top_gainersArray = data.top_gainers;
-        const top_losersArray = data.top_losers;
-        const most_actively_tradedArray = data.most_actively_traded;
+        const top_gainersArray = data.stockList.top_gainers;
+        const top_losersArray = data.stockList.top_losers;
+        const most_actively_tradedArray = data.stockList.most_actively_traded;
 
         populateTable(top_gainersArray, gainersTable);
         populateTable(top_losersArray, losersTable);

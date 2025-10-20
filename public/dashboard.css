@@ -315,7 +315,8 @@ th {
    width: 100px; 
   }
   
-#trade-form button { min-width: 80px; 
+#trade-form button { 
+  min-width: 80px; 
 }
 
 #TopGainerTable, #TopLosersTable, #TopActivelyTraded {
