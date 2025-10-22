@@ -6,10 +6,10 @@ const app = require('../app');
 const User = require('../models/user.model');
 
 /* ------------------------------------------------------------------
-   🧩 Mocks
+  Mocks
 -------------------------------------------------------------------*/
 
-// ✅ Keep real Mongoose internals (Schema, model, etc.), but mock connect()
+// Keep real Mongoose internals (Schema, model, etc.), but mock connect()
 jest.mock('mongoose', () => {
   const actualMongoose = jest.requireActual('mongoose');
   return {
@@ -18,10 +18,10 @@ jest.mock('mongoose', () => {
   };
 });
 
-// ✅ Mock the User model methods
+// Mock the User model methods
 jest.mock('../models/user.model');
 
-// ✅ Mock express-session middleware with conditional control
+// Mock express-session middleware with conditional control
 jest.mock('express-session', () => {
   return () => (req, res, next) => {
     // Allow tests to flag "no logged-in user" cases
@@ -38,7 +38,7 @@ jest.mock('express-session', () => {
 });
 
 /* ------------------------------------------------------------------
-   🧩 Test Suites
+  Test Suites
 -------------------------------------------------------------------*/
 
 describe('Authentication Routes', () => {
