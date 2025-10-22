@@ -1,7 +1,6 @@
 /**
  * @jest-environment jsdom
  */
-
 const { handleLogin } = require('../public/index');
 
 describe('Login Form Submission', () => {

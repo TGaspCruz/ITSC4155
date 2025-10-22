@@ -166,7 +166,7 @@ async function loadPortfolio() {
         });
         document.getElementById('username').textContent = `${user.username}'s Portfolio`;
         document.getElementById('available-funds').textContent = `$${(user.portfolio.availableFunds || 0).toFixed(2)}`;
-        document.getElementById('total-invested').textContent = `$${totalInvestment}`;
+        document.getElementById('total-invested').textContent = `$${totalInvestment.toFixed(2)}`;
     } catch (err) {
         console.error('Failed to load portfolio', err);
         document.getElementById('holdings-body').innerHTML = '<tr><td colspan="5">Error loading portfolio</td></tr>';
