@@ -124,14 +124,14 @@ button:hover {
   color: white;
 }
 
-#table-container{
-    display: flex;
-    justify-content: center;
-} 
+#table-container {
+  display: flex;
+  justify-content: center;
+}
 
 table {
-    background-color: white;
-    color: black;
+  background-color: white;
+  color: black;
 }
 
 th {
@@ -141,49 +141,49 @@ th {
 /* Advanace Search Page */
 
 .advance-search-main {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 2em;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 2em;
 }
 
 .search-container {
-    width: 600px;
-    background: #fff;
-    border-radius: 5px;
-    align-self: center;
+  width: 600px;
+  background: #fff;
+  border-radius: 5px;
+  align-self: center;
 }
 
 .row {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 #input-box {
-    flex: 1;
-    height: 50px;
-    background: transparent;
-    border: 0;
-    outline: 0;
-    font-size: 18px;
-    color: #333;
+  flex: 1;
+  height: 50px;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font-size: 18px;
+  color: #333;
 }
 
 #searchResults ul {
-    border-top: 1px solid #080707;
-    padding: 15px 10px;
-    margin: 0px;
+  border-top: 1px solid #080707;
+  padding: 15px 10px;
+  margin: 0px;
 }
 
 #searchResults ul li {
-    list-style: none;
-    border-radius: 3px;
-    padding: 15px 10px;
-    cursor: pointer;
+  list-style: none;
+  border-radius: 3px;
+  padding: 15px 10px;
+  cursor: pointer;
 }
 
 #searchResults ul li:hover {
-    background: #4a6c96;
+  background: #4a6c96;
 }
 
 .stock-container {
@@ -197,17 +197,28 @@ th {
   gap: 10px;
 }
 
-.stock-container p, .stock-container h2 {
+.stock-container p,
+.stock-container h2 {
   margin: 0;
   flex: 1;
 }
 
-#TopGainerTable, #TopLosersTable, #TopActivelyTraded {
+#TopGainerTable,
+#TopLosersTable,
+#TopActivelyTraded {
   border: 1px solid black;
   background-color: #bfbdc7;
   text-align: center;
 }
 
-#TopGainerTable th, #TopLosersTable th, #TopActivelyTraded th {
+#TopGainerTable th,
+#TopLosersTable th,
+#TopActivelyTraded th {
   text-decoration: underline;
+}
+
+#portfolio-value {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
 }

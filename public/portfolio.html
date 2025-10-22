@@ -1,160 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Portfolio</title>
-    <link rel="stylesheet" href="dashboard.css">
-</head>
-<body>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
     <header>
-        <h1 id="username">Portfolio</h1>
-        <nav>
-        <a  class="navLink" href="dashboard.html">Dashboard</a>
+      <h1 id="username">Portfolio</h1>
+      <nav>
+        <h1 id="portfolio-value">Portfolio Value: $0</h1>
+        <a class="navLink" href="dashboard.html">Dashboard</a>
         <a class="navLink" href="portfolio.html">Portfolio</a>
         <a class="navLink" href="advanceSearch.html">Advance Search</a>
-        </nav>
-        <button id="logoutBtn">Logout</button>
+      </nav>
+      <button id="logoutBtn">Logout</button>
     </header>
     <main class="portfolio-main">
-        <section>
-            <h2>Available Funds</h2>
-            <p id="available-funds"></p>
-        </section>
-        <section>
-            <h2>Stock Holdings</h2>
-            <div id="table-container">
-            <table id="holdings-table" border="1" cellpadding="6">
-                <thead>
-                    <tr>
-                        <th>Ticker</th>
-                        <th>Quantity</th>
-                        <th>Avg Price</th>
-                        <th>Market Value</th>
-                    </tr>
-                </thead>
-                <tbody id="holdings-body">
-                </tbody>
-            </table>
-            </div>
-        </section>
+      <section>
+        <h2>Available Funds</h2>
+        <p id="available-funds"></p>
+      </section>
+      <section>
+        <h2>Stock Holdings</h2>
+        <div id="table-container">
+          <table id="holdings-table" border="1" cellpadding="6">
+            <thead>
+              <tr>
+                <th>Ticker</th>
+                <th>Quantity</th>
+                <th>Avg Price</th>
+                <th>Market Value</th>
+              </tr>
+            </thead>
+            <tbody id="holdings-body"></tbody>
+          </table>
+        </div>
+      </section>
     </main>
     <script src="portfolio.js"></script>
-</body>
+  </body>
 
-<script>
+  <script>
+    let portfolioValue = 0;
 
-    
-    
-    
     async function getFunds() {
-  
-  
-  
-  const res = await fetch("/api/getFunds");
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById("available-funds").textContent = data.availableFunds;
-    
-  } else {
-    console.error("Failed to fetch funds:", data.message);
-  }
-}
+      const res = await fetch("/api/getFunds");
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById("available-funds").textContent =
+          data.availableFunds;
+      } else {
+        console.error("Failed to fetch funds:", data.message);
+      }
+    }
 
-async function getStocks() {
-  const res = await fetch("/api/getStocks");
-  const data = await res.json();
-  if (data.success) {
-    const tbody = document.getElementById("holdings-body");
-    tbody.innerHTML = ""; 
+    async function getStocks() {
+      portfolioValue = 0;
+      const res = await fetch("/api/getStocks");
+      const data = await res.json();
+      if (data.success) {
+        const tbody = document.getElementById("holdings-body");
+        tbody.innerHTML = "";
 
-    data.stocks.forEach(stock => {
-      const marketValue = (stock.quantity * stock.avgPrice).toFixed(2);
-      const row = document.createElement("tr");
-      
-      row.innerHTML = `
+        data.stocks.forEach((stock) => {
+          const marketValue = (stock.quantity * stock.avgPrice).toFixed(2);
+          const row = document.createElement("tr");
+          portfolioValue += parseFloat(marketValue);
+
+          row.innerHTML = `
         <td>${stock.ticker}</td>
         <td>${stock.quantity}</td>
         <td>${stock.avgPrice.toFixed(2)}</td>
         <td>${marketValue}</td>
-        <td id = "${stock._id}"> <button id= "sellStockButton${stock._id}">Sell</button> </td>
+        <td id = "${stock._id}"> <button id= "sellStockButton${
+            stock._id
+          }">Sell</button> </td>
       `;
 
-      tbody.appendChild(row);
+          tbody.appendChild(row);
+        });
 
+        data.stocks.forEach((stock) => {
+          document
+            .getElementById("sellStockButton" + stock._id)
+            .addEventListener("click", () => {
+              let clickedStock = document.getElementById(
+                "sellStockButton" + stock._id
+              ).parentElement.id;
+              console.log(clickedStock + stock._id);
 
+              data.stocks.forEach((stock) => {
+                let sellname = document.getElementById([stock._id]);
 
-      
-    });
+                if (clickedStock === stock._id) {
+                  console.log(sellname);
+                  alert("Sold " + stock._id);
 
-     data.stocks.forEach(stock => { 
-      document.getElementById("sellStockButton" + stock._id).addEventListener("click", () => {
+                  document.getElementById(
+                    stock._id
+                  ).parentElement.style.display = "none";
 
-
-      let clickedStock = document.getElementById("sellStockButton" + stock._id).parentElement.id;
-      console.log(clickedStock + stock._id);
-    
-      data.stocks.forEach(stock => {
-        let sellname = document.getElementById([stock._id]);
-      
-        if(clickedStock === stock._id){
-        console.log(sellname);
-        alert("Sold " + stock._id );
-
-        document.getElementById(stock._id).parentElement.style.display = "none";
-        
-
-        fetch("/api/sellStock", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    ticker: stock._id,
-    price: stock.avgPrice.toFixed(2),
-    quantity: stock.quantity
-  })
-})
-  .then(response => response.json())
-  .then(data => {
-    console.log(data);
-    
-  });
-
-  
-
-        
-        
-        }
-        
-      
-      
-      
+                  fetch("/api/sellStock", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      ticker: stock._id,
+                      price: stock.avgPrice.toFixed(2),
+                      quantity: stock.quantity,
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      console.log(data);
+                    });
+                }
+              });
+            });
+        });
+      } else {
+        console.error("Failed to fetch stocks:", data.message);
       }
-      
-        
-      );
-      
+    }
+
+    window.addEventListener("load", () => {
+      getFunds();
+      getStocks();
     });
+  </script>
 
+  <!-- Chart Container -->
+  <div
+    style="
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      margin-bottom: 30px;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    "
+  >
+    <canvas
+      id="myChart"
+      style="width: 100%; max-width: 650px; height: 350px"
+    ></canvas>
+  </div>
 
-     });
-    
-    
-  } else {
-    console.error("Failed to fetch stocks:", data.message);
-  }
-}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="dashboard.js"></script>
+  <script>
+    const data = {
+      labels: [],
+      datasets: [
+        {
+          label: "My Data",
+          data: [],
+        },
+      ],
+    };
 
+    const config = {
+      type: "line",
+      data: data,
+    };
 
+    function updateChart() {
+      data.labels.push(new Date().toLocaleTimeString());
 
+      data.datasets[0].data.push(portfolioValue);
 
-window.addEventListener("load", () => {
-  getFunds();
-  getStocks();
-});
+      myChart.update();
+    }
 
+    const ctx = document.getElementById("myChart").getContext("2d");
+    const myChart = new Chart(ctx, config);
 
-
-</script>
+    setInterval(updateChart, 1000);
+    setInterval(getStocks, 1000);
+  </script>
 </html>
