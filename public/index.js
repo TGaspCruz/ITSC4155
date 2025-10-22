@@ -25,11 +25,11 @@ async function handleLogin(event, loginForm, loginMessage, fetchFn = fetch) {
 
         if (response.ok) {
             loginMessage.style.color = 'green';
-            loginMessage.textContent = payload.message || 'Login successful';
-            setTimeout(() => { window.location.href = payload.redirect || '/dashboard'; }, 600);
+            loginMessage.textContent = payload.message;
+            setTimeout(() => { window.location.href = payload.redirect;}, 600);
         } else {
             loginMessage.style.color = 'red';
-            loginMessage.textContent = payload.message || `Error: ${response.status}`;
+            loginMessage.textContent = payload.message;
         }
     } catch (err) {
         loginMessage.style.color = 'red';
