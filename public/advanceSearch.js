@@ -16,7 +16,7 @@ const stockChangePercent = document.getElementById('stock-change-percent');
 const tradeTicker = document.getElementById('trade-ticker');
 const tradePrice = document.getElementById('trade-price');
 const availableFundsBuy = document.getElementById("available-funds-buy");
-let debounceTimer;
+let debounceTimer = null;
 // Basic logout (Requires further implementation)
 document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     try {
@@ -46,6 +46,7 @@ searchInput.addEventListener("input", (event) => {
 // otherwise display that the stock does not exist
 // Or if the input is empty then display that the input is invalid
 searchButton.addEventListener("click", () => {
+    clearTimeout(debounceTimer); // Stop fetch call if search button is clicked before stock recommendations are shown
     const input = searchInput.value.toUpperCase();
     makeSearchRequest(input);
 });

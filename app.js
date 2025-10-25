@@ -189,7 +189,6 @@ app.post("/api/sellStock", async (req, res) => {
         const { ticker, price, quantity } = req.body;
         const user = await User.findOne({ email: req.session.user.email });
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
-        if (!user.portfolio.stocks) return res.status(400).json({ success: false, message: "No stocks to sell" });
 
         let stock = user.portfolio.stocks.find(s => s.ticker === ticker);
         if (!stock || stock.quantity < quantity) {
