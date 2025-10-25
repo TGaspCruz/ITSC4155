@@ -7,19 +7,19 @@ describe('Login Form Submission', () => {
     let loginForm, loginMessage;
 
     beforeEach(() => {
-        // Mock DOM
+        // Mock DOM to test messages changes and form calss
         document.body.innerHTML = `
             <form id="loginForm">
-                <input name="email" value="test@example.com" />
-                <input name="password" value="123456" />
+                <input name="email" />
+                <input name="password" />
             </form>
-            <div id="loginMessage"></div>
+            <p id="loginMessage"></p>
         `;
 
         loginForm = document.getElementById('loginForm');
         loginMessage = document.getElementById('loginMessage');
     });
-
+    // Test for succussful login attempt changes
     test('displays success message on successful login', async () => {
         const mockFetch = jest.fn(() =>
             Promise.resolve({
@@ -35,7 +35,7 @@ describe('Login Form Submission', () => {
         expect(loginMessage.textContent).toBe('Login OK');
         expect(loginMessage.style.color).toBe('green');
     });
-
+    // Test for unsuccussful login attempt changes
     test('displays error message on failed login', async () => {
         const mockFetch = jest.fn(() =>
             Promise.resolve({
@@ -51,7 +51,7 @@ describe('Login Form Submission', () => {
         expect(loginMessage.textContent).toBe('Invalid credentials');
         expect(loginMessage.style.color).toBe('red');
     });
-
+    // Test for server issue message changes
     test('handles network error gracefully', async () => {
         const mockFetch = jest.fn(() => Promise.reject(new Error('Network failure')));
 
