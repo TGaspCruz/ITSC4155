@@ -129,7 +129,6 @@ app.get("/api/stockList", async (req, res) => {
       throw new Error(`AlphaVantage HTTP ${stockListResponse.status}`);
     }
     const stockListJson = await stockListResponse.json();
-    console.log("Fetched stock list:", stockListJson);
     res.json({ success: true, stockList: stockListJson });
   } catch (err) {
     console.error("Error in /api/stockList:", err);
@@ -256,8 +255,8 @@ app.get('/api/search/:ticker', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
         }
         // Demo Key
-        const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=tesco&apikey=demo`);
-        //const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`);
+        //const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=tesco&apikey=demo`);
+        const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`);
         if (!searchResponse.ok) {
             throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
         }
@@ -277,8 +276,8 @@ app.get('/api/quote/:ticker', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
         }
         // Demo Key
-        const quoteResponse = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
-        //const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.API_KEY}`);
+        //const quoteResponse = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
+        const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.API_KEY}`);
         if (!quoteResponse.ok) {
             throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
         }

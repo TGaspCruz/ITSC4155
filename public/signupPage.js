@@ -5,11 +5,6 @@ if (signupForm) {
     signupForm.addEventListener('submit', (e) => handleSignup(e, signupForm, signupMessage));
 }
 
-// Export for testing in Node (jsdom)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { handleSignup };
-}
-
 async function handleSignup(event, signupForm, signupMessage, fetchFn = fetch,) {
     event.preventDefault();
 
@@ -47,3 +42,6 @@ async function handleSignup(event, signupForm, signupMessage, fetchFn = fetch,) 
         signupMessage.textContent = 'Network error. Please try again.';
     }
 }
+
+module.exports = { handleSignup };
+
