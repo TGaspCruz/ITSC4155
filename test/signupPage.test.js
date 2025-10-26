@@ -22,6 +22,8 @@ describe('Signup Form Submission', () => {
     });
     // Test for succussful registration
     test('shows success message and schedules redirect on successful registration', async () => {
+        // Make sure event.preventDefault doesnt stop test from running
+        // Also check that its called in our JS file
         const mockFetch = jest.fn(() =>
             Promise.resolve({
                 ok: true,

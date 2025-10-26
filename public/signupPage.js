@@ -1,6 +1,6 @@
 const signupForm = document.getElementById("signupForm");
 const signupMessage = document.getElementById('signupMessage');
-// Attach listener in browser runtime
+// if statement needed for Jest to not have error working with JS file
 if (signupForm) {
     signupForm.addEventListener('submit', (e) => handleSignup(e, signupForm, signupMessage));
 }

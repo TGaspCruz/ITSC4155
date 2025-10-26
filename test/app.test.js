@@ -15,6 +15,7 @@ jest.mock('mongoose', () => {
 });
 
 // Mock the User model so that we can test with mock user data
+// Mock the user functionality such as save
 jest.mock('../models/user.model');
 
 // Mock express-session middleware with conditional control
