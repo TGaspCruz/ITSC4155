@@ -15,7 +15,9 @@ describe('advanceSearch functions', () => {
 					<input id="input-box" />
 					<button id="searchButton"></button>
 				</div>
-				<div id="searchResults" style="display:none"><ul id="result-list"></ul></div>
+				<div id="searchResults" style="display:none">
+					<ul id="result-list"></ul>
+				</div>
 			</div>
 			<div class="stock-container" style="display:none">
 				<div class="stock-details">
@@ -27,11 +29,11 @@ describe('advanceSearch functions', () => {
 					<p id="stock-volume"></p>
 					<p id="stock-change"></p>
 					<p id="stock-change-percent"></p>
+					<p id="available-funds-buy"></p>
 				</div>
 				<form id="trade-form">
 					<input id="trade-ticker" name="ticker" />
 					<input id="trade-price" name="price" />
-					<div id="available-funds-buy"></div>
 				</form>
 			</div>
 		`;
