@@ -6,6 +6,7 @@ const app = require('../app');
 const User = require('../models/user.model');
 
 // Pretend DB connection made so that tests can run without error
+// Bypass need to have actual DB connection
 jest.mock('mongoose', () => {
     const actualMongoose = jest.requireActual('mongoose');
     return {
@@ -15,10 +16,11 @@ jest.mock('mongoose', () => {
 });
 
 // Mock the User model so that we can test with mock user data
+// Can mock the functions to further test responses
 // Mock the user functionality such as save
 jest.mock('../models/user.model');
 
-// Mock express-session middleware with conditional control
+// Mock user session to test different scenarios needing sessions 
 jest.mock('express-session', () => {
     return () => (req, res, next) => {
         // Test for user session in different testing cases
@@ -91,7 +93,7 @@ describe('Login/Register Routes', () => {
     });
     // Test that password matches with what is in DB corresponding to Email
     test('POST /login returns 401 if password incorrect', async () => {
-        // A user exists but 
+        // A user exists but passwords dont match
         User.findOne.mockResolvedValue({
             username: 'testuser',
             email: 'test@email.com',
@@ -122,7 +124,7 @@ describe('Login/Register Routes', () => {
         expect(res.body.redirect).toBe('/dashboard');
     });
 });
-
+// Test for buy and sell API scenarios
 describe('Buying/Selling Routes', () => {
     beforeEach(() => jest.clearAllMocks());
     // Test for user not logged in trying to buy
@@ -134,7 +136,7 @@ describe('Buying/Selling Routes', () => {
 
         expect(res.status).toBe(401);
     });
-    // Test for insufficient funds
+    // Test for logged in user with insufficient funds
     test('POST /api/buyStock returns 400 if not enough funds in account', async () => {
         const mockUser = {
             portfolio: { availableFunds: 100, stocks: [] },
@@ -206,7 +208,7 @@ describe('Buying/Selling Routes', () => {
         expect(res.body.success).toBe(false);
         expect(res.body.message).toMatch(/User not found/i);
     });
-    // Test for if user has that stock to sell
+    // Test for if user has that no stock to sell
     test('POST /api/sellStock returns 400 if no stocks to sell', async () => {
         const mockUser = {
             portfolio: { availableFunds: 1000, stocks: [] },
