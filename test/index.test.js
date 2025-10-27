@@ -21,6 +21,8 @@ describe('Login Form Submission', () => {
     });
     // Test for succussful login attempt changes
     test('displays success message on successful login', async () => {
+        // Make sure event.preventDefault doesnt stop test from running
+        // Also check that its called in our JS file
         const mockFetch = jest.fn(() =>
             Promise.resolve({
                 ok: true,

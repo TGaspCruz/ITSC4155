@@ -1,13 +1,8 @@
 const signupForm = document.getElementById("signupForm");
 const signupMessage = document.getElementById('signupMessage');
-// Attach listener in browser runtime
+// if statement needed for Jest to not have error working with JS file
 if (signupForm) {
     signupForm.addEventListener('submit', (e) => handleSignup(e, signupForm, signupMessage));
-}
-
-// Export for testing in Node (jsdom)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { handleSignup };
 }
 
 async function handleSignup(event, signupForm, signupMessage, fetchFn = fetch,) {
@@ -47,3 +42,6 @@ async function handleSignup(event, signupForm, signupMessage, fetchFn = fetch,) 
         signupMessage.textContent = 'Network error. Please try again.';
     }
 }
+
+module.exports = { handleSignup };
+

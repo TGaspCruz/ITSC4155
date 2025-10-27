@@ -129,7 +129,6 @@ app.get("/api/stockList", async (req, res) => {
       throw new Error(`AlphaVantage HTTP ${stockListResponse.status}`);
     }
     const stockListJson = await stockListResponse.json();
-    console.log("Fetched stock list:", stockListJson);
     res.json({ success: true, stockList: stockListJson });
   } catch (err) {
     console.error("Error in /api/stockList:", err);
