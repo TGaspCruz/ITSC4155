@@ -1,10 +1,13 @@
-let signupForm = document.getElementById("signupForm");
-let signupMessage = document.getElementById('signupMessage');
+const signupForm = document.getElementById("signupForm");
+const signupMessage = document.getElementById('signupMessage');
+// if statement needed for Jest to not have error working with JS file
+if (signupForm) {
+    signupForm.addEventListener('submit', (e) => handleSignup(e, signupForm, signupMessage));
+}
 
+async function handleSignup(event, signupForm, signupMessage, fetchFn = fetch,) {
+    event.preventDefault();
 
-signupForm.addEventListener("submit", async function(event) {
-    event.preventDefault(); // Prevent the default form submission
-    
     const formData = new FormData(signupForm);
     const data = {
         username: formData.get("username"),
@@ -13,7 +16,7 @@ signupForm.addEventListener("submit", async function(event) {
     };
 
     try {
-        const response = await fetch('/register', {
+        const response = await fetchFn('/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -25,19 +28,20 @@ signupForm.addEventListener("submit", async function(event) {
 
         console.log('Response payload:', payload);
         if (response.ok) {
-            // Successful registration signupMessage and redirect to dashboard
+            // Successful registration
             signupMessage.style.color = 'green';
-            signupMessage.textContent = payload.message || 'Signup successful';
-            setTimeout(() => { window.location.href = payload.redirect; }, 600);
-        
+            signupMessage.textContent = payload.message;
+            setTimeout(() => { window.location.href = payload.redirect; }, 600)
         } else {
-            // Display error signupMessage from server
+            // Display error message from server
             signupMessage.style.color = 'red';
-            signupMessage.textContent = payload.message || `Error: ${response.status}`;
+            signupMessage.textContent = payload.message;
         }
     } catch (err) {
-        console.error('Fetch error', err);
         signupMessage.style.color = 'red';
         signupMessage.textContent = 'Network error. Please try again.';
     }
-});
+}
+
+module.exports = { handleSignup };
+
