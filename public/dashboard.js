@@ -1,7 +1,7 @@
 // Basic form display(Requires further implementation)
 //document.getElementById("buyButton").style.display = "none";
 const buyBtn = document.getElementById("buyBtn");
-const canvas = document.getElementById("priceChart");
+//const canvas = document.getElementById("priceChart");
 const searchBtn = document.getElementById("searchBtn");
 const tickerInput = document.getElementById("ticker");
 const searchedTickerPrice = document.getElementById("searchedTickerPrice");
