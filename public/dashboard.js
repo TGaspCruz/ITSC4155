@@ -1,3 +1,15 @@
+setInterval(simulateStockUpdates, 1000);
+
+document.getElementById("buyButton").style.display = "none";
+const buyBtn = document.getElementById("buyBtn");
+const canvas = document.getElementById("priceChart");
+
+function showForm(type) {
+  document.getElementById("form-title").textContent =
+    type === "buy" ? "Buy Stock" : "Sell Stock";
+  document.getElementById("trade-form").style.display = "block";
+
+  document.getElementById("buyButton").style.display = "none";
 // Basic form display(Requires further implementation)
 //document.getElementById("buyButton").style.display = "none";
 const buyBtn = document.getElementById("buyBtn");
@@ -16,7 +28,8 @@ async function showForm(type) {
 }
 
 function closeForm() {
-    document.getElementById("trade-form").style.display = "none";
+  document.getElementById("trade-form").style.display = "none";
+  document.getElementById("buyButton").style.display = "block";
 }
 
 searchBtn.addEventListener('click', async () => {
@@ -160,10 +173,22 @@ async function fetchStockData() {
                 html += `<tr>
                             <td>${stock.ticker}</td>
                             <td>$${Number(stock.price).toFixed(2)}</td>
-                            <td style="color:${Number(stock.change_amount).toFixed(2) >= 0 ? 'green' : 'red'};">
-                                ${Number(stock.change_amount).toFixed(2) >= 0 ? '+' : ''}${Number(stock.change_amount).toFixed(2)}
+                            <td style="color:${
+                              Number(stock.change_amount).toFixed(2) >= 0
+                                ? "green"
+                                : "red"
+                            };">
+                                ${
+                                  Number(stock.change_amount).toFixed(2) >= 0
+                                    ? "+"
+                                    : ""
+                                }${Number(stock.change_amount).toFixed(2)}
                             </td>
-                            <td style="color:${Number(stock.change_amount).toFixed(2) >= 0 ? 'green' : 'red'};">
+                            <td style="color:${
+                              Number(stock.change_amount).toFixed(2) >= 0
+                                ? "green"
+                                : "red"
+                            };">
                                 ${stock.change_percentage}
                             <td>${stock.volume}</td>
                             </tr>`;
@@ -181,7 +206,6 @@ async function fetchStockData() {
     } catch (error) {
         console.error('Error fetching stock data:', error);
     }
-}
 
 // const ctx = canvas.getContext("2d");
 // let portfolioValue = 0;
