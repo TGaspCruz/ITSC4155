@@ -120,26 +120,6 @@ app.post("/register", (req, res) => {
         });
 });
 
-app.get("/api/stockList", async (req, res) => {
-  try {
-    // Demokey
-    const stockListResponse = await fetch("https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=demo");
-    // const stockListReRponse = await fetch(`https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${process.env.API_KEY}`);
-    if (!stockListResponse.ok) {
-      throw new Error(`AlphaVantage HTTP ${stockListResponse.status}`);
-    }
-    const stockListJson = await stockListResponse.json();
-    res.json({ success: true, stockList: stockListJson });
-  } catch (err) {
-    console.error("Error in /api/stockList:", err);
-    return res.status(500).json({
-        success: false,
-        message: "Error fetching stock data",
-        detail: String(err),
-        });
-    }
-});
-
 // Logout route - destroys the session
 app.post("/logout", (req, res) => {
     req.session.destroy((err) => {
@@ -290,6 +270,26 @@ app.get('/api/quote/:ticker', async (req, res) => {
     } catch (err) {
         console.error('Error in /api/quote:', err);
         return res.status(500).json({ success: false, message: 'Error fetching quote', detail: String(err) });
+    }
+});
+
+app.get("/api/stockList", async (req, res) => {
+  try {
+    // Demokey
+    const stockListResponse = await fetch("https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=demo");
+    // const stockListReRponse = await fetch(`https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${process.env.API_KEY}`);
+    if (!stockListResponse.ok) {
+      throw new Error(`AlphaVantage HTTP ${stockListResponse.status}`);
+    }
+    const stockListJson = await stockListResponse.json();
+    res.json({ success: true, stockList: stockListJson });
+  } catch (err) {
+    console.error("Error in /api/stockList:", err);
+    return res.status(500).json({
+        success: false,
+        message: "Error fetching stock data",
+        detail: String(err),
+        });
     }
 });
 
