@@ -10,7 +10,6 @@
     <header>
       <h1 id="username">Portfolio</h1>
       <nav>
-        <h1 id="portfolio-value">Portfolio Value: $0</h1>
         <a class="navLink" href="dashboard.html">Dashboard</a>
         <a class="navLink" href="portfolio.html">Portfolio</a>
         <a class="navLink" href="advanceSearch.html">Advance Search</a>
@@ -133,60 +132,6 @@
   </script>
 
   <!-- Chart Container -->
-  <div
-    style="
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 20px;
-      margin-bottom: 30px;
-      background: #f8f9fa;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      width: 90%;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
-    "
-  >
-    <canvas
-      id="myChart"
-      style="width: 100%; max-width: 650px; height: 350px"
-    ></canvas>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="dashboard.js"></script>
-  <script>
-    const data = {
-      labels: [],
-      datasets: [
-        {
-          label: "My Data",
-          data: [],
-        },
-      ],
-    };
-
-    const config = {
-      type: "line",
-      data: data,
-    };
-
-    function updateChart() {
-      data.labels.push(new Date().toLocaleTimeString());
-
-      data.datasets[0].data.push(portfolioValue);
-
-      myChart.update();
-    }
-
-    const ctx = document.getElementById("myChart").getContext("2d");
-    const myChart = new Chart(ctx, config);
-
-    setInterval(updateChart, 1000);
-    setInterval(getStocks, 1000);
+  
   </script>
 </html>

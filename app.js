@@ -191,13 +191,15 @@ app.post("/api/buyStock", async (req, res) => {
   const totalCost = price * quantity; //calculate the cost of the purchased stock
 
   if (user.portfolio.availableFunds < totalCost) {
-    return res.status(400).json({ success: false });
+    return res
+      .status(400)
+      .json({ success: false, message: "/Insufficient funds/i" });
   } // verify user has enough funds
 
   user.portfolio.availableFunds -= totalCost; //deduct funds
   user.portfolio.stocks.push({ ticker, quantity, avgPrice: price }); //add stock to the users owned stocks array
   await user.save(); //save
-  res.json({ success: true }); //return success
+  res.json({ success: true, message: "/Successful buy/i" }); //return success
 });
 
 app.post("/api/sellStock", async (req, res) => {
@@ -224,7 +226,7 @@ app.post("/api/sellStock", async (req, res) => {
 
   await user.save();
 
-  res.json({ success: true });
+  res.json({ success: true, message: "Stock sold successfully!" });
 });
 
 //get the users funds

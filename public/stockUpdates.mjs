@@ -23,11 +23,5 @@ export async function simulateStockUpdates() {
         .then((response) => response.json())
         .then((data) => console.log(data));
     });
-
-    const portfolioElem = document.getElementById("portfolio-value");
-    if (portfolioElem) {
-      portfolioElem.textContent =
-        "Portfolio Value: $" + portfolioValue.toFixed(2);
-    }
   }
 }
