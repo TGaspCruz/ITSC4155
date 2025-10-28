@@ -16,7 +16,7 @@ const stockChangePercent = document.getElementById('stock-change-percent');
 const tradeTicker = document.getElementById('trade-ticker');
 const tradePrice = document.getElementById('trade-price');
 const availableFundsBuy = document.getElementById("available-funds-buy");
-let debounceTimer;
+let debounceTimer = null;
 // Basic logout (Requires further implementation)
 document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     try {
@@ -46,6 +46,7 @@ searchInput.addEventListener("input", (event) => {
 // otherwise display that the stock does not exist
 // Or if the input is empty then display that the input is invalid
 searchButton.addEventListener("click", () => {
+    clearTimeout(debounceTimer); // Stop fetch call if search button is clicked before stock recommendations are shown
     const input = searchInput.value.toUpperCase();
     makeSearchRequest(input);
 });
@@ -82,12 +83,6 @@ async function makeSearchRequest(input) {
             searchResults.style.display = 'block';
             return;
         } 
-        if (!ul.hasChildNodes()) {
-            ul.innerHTML = '';
-            ul.textContent = 'Ticker Symbol not found';
-            searchResults.style.display = 'block';
-            return;
-        }
         if (input.length >= 1 && input.length <= 10) {
             const [quoteResponse, availableFundsResponse] = await Promise.all([
                 fetch(`/api/quote/${input}`).then(res => res.json()),
@@ -111,7 +106,7 @@ async function makeSearchRequest(input) {
             hideResults();
         }
     } catch (error) {
-        console.error('Search error', err);
+        console.log('Search error', error);
         searchInput.value = '';
         ul.innerHTML = '';
         ul.textContent = 'Error fetching results';
@@ -196,6 +191,8 @@ function setUpStockData(quote) {
 }
 
 function hideResults() {
-    if (ul) ul.innerHTML = '';
-    if (searchResults) searchResults.style.display = 'none';
+    ul.innerHTML = '';
+    searchResults.style.display = 'none';
 }
+
+module.exports = { getStockRecommendations, makeSearchRequest, displayBestMatchResults, setUpStockData, hideResults };

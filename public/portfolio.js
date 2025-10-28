@@ -1,45 +1,3 @@
-// Fetch current prices for all stocks
-// async function fetchCurrentPrices(stocks) {
-//     const prices = {};
-//     for (const stock of stocks) {
-//         try {
-//             const response = await fetch(`/api/quote/${stock.ticker}`);
-//             const data = await response.json();
-//             if (data.success && data.quote) {
-//                 prices[stock.ticker] = parseFloat(data.quote['05. price'] || data.quote.price || 0);
-//             }
-//         } catch (error) {
-//             console.error(`Error fetching price for ${stock.ticker}:`, error);
-//         }
-//     }
-//     return prices;
-// }
-
-// Calculate portfolio statistics
-// function calculatePortfolioStats(stocks, currentPrices) {
-//     let totalValue = 0;
-//     let totalInvestment = 0;
-    
-//     stocks.forEach(stock => {
-//         const currentPrice = currentPrices[stock.ticker] || stock.avgPrice;
-//         const investment = stock.quantity * stock.avgPrice;
-//         const currentValue = stock.quantity * currentPrice;
-        
-//         totalValue += currentValue;
-//         totalInvestment += investment;
-//     });
-    
-//     const totalGainLoss = totalValue - totalInvestment;
-//     const gainLossPercent = totalInvestment ? (totalGainLoss / totalInvestment) * 100 : 0;
-    
-//     return {
-//         totalValue,
-//         totalInvestment,
-//         totalGainLoss,
-//         gainLossPercent
-//     };
-// }
-
 // Fetch and display logged in user portfolio data
 async function loadPortfolio() {
     try {
@@ -103,7 +61,7 @@ async function loadPortfolio() {
             `;
             tbody.appendChild(tr);
 
-            // Get elements for this row
+            // Get row elements
             const sellActions = tr.querySelector('.sell-actions');
             const sellButton = tr.querySelector('.sell-button');
             const sellControls = tr.querySelector('.sell-controls');
@@ -111,26 +69,23 @@ async function loadPortfolio() {
             const confirmButton = tr.querySelector('.confirm-sell');
             const cancelButton = tr.querySelector('.cancel-sell');
 
-            // Show sell controls when Sell is clicked
             sellButton.addEventListener('click', () => {
                 sellButton.style.display = 'none';
                 sellControls.style.display = 'inline-block';
             });
 
-            // Hide controls when Cancel is clicked
             cancelButton.addEventListener('click', () => {
                 sellControls.style.display = 'none';
                 sellButton.style.display = 'inline-block';
             });
 
-            // Validate quantity input
-            quantityInput.addEventListener('change', () => {
-                const value = parseInt(quantityInput.value);
-                //if (value < 1) quantityInput.value = 1;
-                //if (value > stock.quantity) quantityInput.value = stock.quantity;
-            });
+            // quantityInput.addEventListener('change', () => {
+            //     const value = parseInt(quantityInput.value);
+            //     //if (value < 1) quantityInput.value = 1;
+            //     //if (value > stock.quantity) quantityInput.value = stock.quantity;
+            // });
 
-            // Handle confirm sell
+            // User confirms sell and the proper
             confirmButton.addEventListener('click', async () => {
                 try {
                     const quantity = parseInt(quantityInput.value);
@@ -153,10 +108,9 @@ async function loadPortfolio() {
 
                     const data = await response.json();
                     if (data.success) {
-                        // Reload the portfolio to show updated state
                         loadPortfolio();
                     } else {
-                        alert('Failed to sell stock: ' + (data.message || 'Unknown error'));
+                        alert('Failed to sell stock: ' + (data.message));
                     }
                 } catch (error) {
                     console.error('Error selling stock:', error);
@@ -166,7 +120,7 @@ async function loadPortfolio() {
         });
         document.getElementById('username').textContent = `${user.username}'s Portfolio`;
         document.getElementById('available-funds').textContent = `$${(user.portfolio.availableFunds || 0).toFixed(2)}`;
-        document.getElementById('total-invested').textContent = `$${totalInvestment}`;
+        document.getElementById('total-invested').textContent = `$${totalInvestment.toFixed(2)}`;
     } catch (err) {
         console.error('Failed to load portfolio', err);
         document.getElementById('holdings-body').innerHTML = '<tr><td colspan="5">Error loading portfolio</td></tr>';
@@ -175,7 +129,6 @@ async function loadPortfolio() {
 
 // Initial load of portfolio data
 loadPortfolio();
-
 // Logout handler
 document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     try {
@@ -187,6 +140,7 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     }
 });
 
+module.exports = { loadPortfolio };
 // Get and display available funds
 // async function getFunds() {
 //     try {
@@ -202,6 +156,48 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
 //         console.error("Error fetching funds:", error);
 //     }
 // }
-
+// Possible future implementation, needs more work
 // // Load funds on page load
 // window.addEventListener("load", getFunds);
+
+// Fetch current prices for all stocks
+// async function fetchCurrentPrices(stocks) {
+//     const prices = {};
+//     for (const stock of stocks) {
+//         try {
+//             const response = await fetch(`/api/quote/${stock.ticker}`);
+//             const data = await response.json();
+//             if (data.success && data.quote) {
+//                 prices[stock.ticker] = parseFloat(data.quote['05. price'] || data.quote.price || 0);
+//             }
+//         } catch (error) {
+//             console.error(`Error fetching price for ${stock.ticker}:`, error);
+//         }
+//     }
+//     return prices;
+// }
+
+// Calculate portfolio statistics
+// function calculatePortfolioStats(stocks, currentPrices) {
+//     let totalValue = 0;
+//     let totalInvestment = 0;
+    
+//     stocks.forEach(stock => {
+//         const currentPrice = currentPrices[stock.ticker] || stock.avgPrice;
+//         const investment = stock.quantity * stock.avgPrice;
+//         const currentValue = stock.quantity * currentPrice;
+        
+//         totalValue += currentValue;
+//         totalInvestment += investment;
+//     });
+    
+//     const totalGainLoss = totalValue - totalInvestment;
+//     const gainLossPercent = totalInvestment ? (totalGainLoss / totalInvestment) * 100 : 0;
+    
+//     return {
+//         totalValue,
+//         totalInvestment,
+//         totalGainLoss,
+//         gainLossPercent
+//     };
+// }
