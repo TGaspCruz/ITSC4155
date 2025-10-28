@@ -5,23 +5,15 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 const User = require("./models/user.model");
 
-mongoose
-  .connect("mongodb://127.0.0.1/InvestmentProjectDB")
-  .then(() => {
-    console.log("Database is connected successfully");
-  })
-  .catch((error) => console.log(error));
+mongoose.connect("mongodb://127.0.0.1/InvestmentProjectDB")
+    .then(() => {
+        console.log("Database is connected successfully");
+    })
+    .catch((error) => console.log(error));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(
-  session({
-    secret: process.env.SECRET_KEY,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
-
+app.use(session({ secret: process.env.SECRET_KEY, resave: false, saveUninitialized: true}));
 // Serve static files after session middleware so the middleware above can protect specific files
 app.use(express.static("public"));
 
@@ -37,19 +29,22 @@ app.get("/dashboard", (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    // checks for both email and password to match and if one or the other is wrong, it will send a message for which one is wrong
-    const user = await User.findOne({ email: email });
-    if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Email not associated with account" });
-    } else if (user.password !== password) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Incorrect password" });
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        // checks for both email and password to match and if one or the other is wrong, it will send a message for which one is wrong
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'Email not associated with account' });
+        }
+        else if (user.password !== password) {
+            return res.status(401).json({ success: false, message: 'Incorrect password' });
+        }
+        req.session.user = {username: user.username, email: user.email};
+        return res.status(200).json({ success: true, message: 'Login successful', redirect: '/dashboard' });
+    } catch (error) {
+        console.error('Error in /login:', error);
+        res.status(500).json({ success: false, message: 'Error logging in. Please try again later.' });
     }
     req.session.user = { username: user.username, email: user.email };
     // const user = await User.findOne({ email: email, password: password });
@@ -182,51 +177,58 @@ app.post("/logout", (req, res) => {
 
 //buy stock request. when the user clicks the confirm button to buy stock, this is called.
 app.post("/api/buyStock", async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ success: false }); //if not user, throw 401 error
+    if (!req.session.user) return res.status(401).json({ success: false });
 
-  const { ticker, price, quantity } = req.body; // variables passed in the html post form body
+    const { ticker, price, quantity } = req.body;
+    const user = await User.findOne({ email: req.session.user.email });
+    const totalCost = price * quantity;
 
-  const user = await User.findOne({ email: req.session.user.email }); // find the matching users email
+    if (user.portfolio.availableFunds < totalCost) {
+        return res.status(400).json({ success: false, message: 'Insufficient funds' });
+    }
 
-  const totalCost = price * quantity; //calculate the cost of the purchased stock
+    user.portfolio.availableFunds -= totalCost;
 
-  if (user.portfolio.availableFunds < totalCost) {
-    return res
-      .status(400)
-      .json({ success: false, message: "/Insufficient funds/i" });
-  } // verify user has enough funds
-
-  user.portfolio.availableFunds -= totalCost; //deduct funds
-  user.portfolio.stocks.push({ ticker, quantity, avgPrice: price }); //add stock to the users owned stocks array
-  await user.save(); //save
-  res.json({ success: true, message: "/Successful buy/i" }); //return success
+    // Aggregate stocks by ticker
+    let stock = user.portfolio.stocks.find(s => s.ticker === ticker);
+    if (stock) {
+        // Calculate new avgPrice
+        const prevTotal = stock.avgPrice * stock.quantity;
+        const newTotal = price * quantity;
+        const newQty = stock.quantity + Number(quantity);
+        stock.avgPrice = (prevTotal + newTotal) / newQty;
+        stock.quantity = newQty;
+    } else {
+        user.portfolio.stocks.push({ ticker, quantity: Number(quantity), avgPrice: Number(price) });
+    }
+    await user.save();
+    res.json({ success: true, message: "Successful buy", availableFunds: user.portfolio.availableFunds });
 });
 
 app.post("/api/sellStock", async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ success: false }); //if not user, throw 401 error
+        if (!req.session.user) return res.status(401).json({ success: false });
 
-  const stockId = req.body.ticker;
+        const { ticker, price, quantity } = req.body;
+        const user = await User.findOne({ email: req.session.user.email });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-  const totalCost = req.body.price * req.body.quantity;
+        let stock = user.portfolio.stocks.find(s => s.ticker === ticker);
+        if (!stock || stock.quantity < quantity) {
+            return res.status(400).json({ success: false, message: "Not enough stock to sell" });
+        }
 
-  const user = await User.findOne({ email: req.session.user.email });
+        // Calculate total sale value
+        const totalValue = price * quantity;
+        user.portfolio.availableFunds += totalValue;
 
-  if (!user)
-    return res.status(404).json({ success: false, message: "User not found" });
-  if (!user.portfolio.stocks)
-    return res
-      .status(400)
-      .json({ success: false, message: "No stocks to sell" });
-
-  user.portfolio.stocks = user.portfolio.stocks.filter((stock) => {
-    return stock._id.toString() !== stockId;
-  });
-
-  user.portfolio.availableFunds += totalCost; //add the funds
-
-  await user.save();
-
-  res.json({ success: true, message: "Stock sold successfully!" });
+        // Adjust quantity
+        stock.quantity -= Number(quantity);
+        if (stock.quantity <= 0) {
+                // Remove stock from portfolio
+                user.portfolio.stocks = user.portfolio.stocks.filter(s => s.ticker !== ticker);
+        }
+        await user.save();
+        res.json({ success: true, message: "Successful sell"});
 });
 
 //get the users funds
@@ -234,29 +236,32 @@ app.get("/api/getFunds", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ success: false, message: "Not logged in" });
   }
-
   try {
     const user = await User.findOne({ email: req.session.user.email });
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
-
-    return res.json({
-      success: true,
-      availableFunds: user.portfolio.availableFunds,
-    });
+    return res.json({success: true, availableFunds: user.portfolio.availableFunds})
   } catch (error) {
-    return;
+    return res.status(500).json({ success: false, message: "Server failure"});
   }
 });
 
 // Return the logged-in user's info and portfolio
-app.get("/api/user", async (req, res) => {
-  try {
-    if (!req.session.user || !req.session.user.email) {
-      return res.status(401).json({ success: false, message: "Not logged in" });
+app.get('/api/user', async (req, res) => {
+    try {
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({ success: false, message: 'Not logged in' });
+        }
+
+        const user = await User.findOne({ username: req.session.user.username, email: req.session.user.email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        return res.json({ success: true, username: user.username, portfolio: user.portfolio });
+    } catch (err) {
+        console.error('Error in /api/user:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching user data', detail: String(err) });
     }
 
     const user = await User.findOne({
@@ -297,13 +302,24 @@ app.get("/api/getStocks", async (req, res) => {
   });
 });
 
-app.get("/api/search/:ticker", async (req, res) => {
-  try {
-    const ticker = req.params.ticker;
-    if (!ticker || typeof ticker !== "string" || ticker.length < 1) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid ticker parameter" });
+app.get('/api/search/:ticker', async (req, res) => {
+    try {
+        const ticker = req.params.ticker;
+        if (!ticker || typeof ticker !== 'string' || ticker.length < 1) {
+            return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
+        }
+        // Demo Key
+        const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=tesco&apikey=demo`);
+        //const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`);
+        if (!searchResponse.ok) {
+            throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
+        }
+        const stockListMatches = await searchResponse.json();
+        console.log('Fetched search results:', stockListMatches);
+        return res.json({ success: true, bestMatches: stockListMatches.bestMatches || [] });
+    } catch (err) {
+        console.error('Error in /api/search:', err);
+        return res.status(500).json({ success: false, message: 'Error performing search', detail: String(err) });
     }
     const searchResponse = await fetch(
       `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`
@@ -322,6 +338,50 @@ app.get("/api/search/:ticker", async (req, res) => {
       detail: String(err),
     });
   }
+});
+
+app.get('/api/quote/:ticker', async (req, res) => {
+    try {
+        const ticker = req.params.ticker;
+        if (!ticker || typeof ticker !== 'string' || ticker.length < 1) {
+            return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
+        }
+        // Demo Key
+        const quoteResponse = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
+        //const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.API_KEY}`);
+        if (!quoteResponse.ok) {
+            throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
+        }
+        const quoteJson = await quoteResponse.json();
+        if (!quoteJson || Object.keys(quoteJson['Global Quote']).length === 0) {
+            return res.json({ success: false, message: "Ticker Symbol Not Found "});
+        }
+        console.log('Fetched global quote:', quoteJson);
+        return res.json({ success: true, quote: quoteJson['Global Quote']});
+    } catch (err) {
+        console.error('Error in /api/quote:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching quote', detail: String(err) });
+    }
+});
+
+app.get("/api/stockList", async (req, res) => {
+  try {
+    // Demokey
+    const stockListResponse = await fetch("https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=demo");
+    // const stockListReRponse = await fetch(`https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${process.env.API_KEY}`);
+    if (!stockListResponse.ok) {
+      throw new Error(`AlphaVantage HTTP ${stockListResponse.status}`);
+    }
+    const stockListJson = await stockListResponse.json();
+    res.json({ success: true, stockList: stockListJson });
+  } catch (err) {
+    console.error("Error in /api/stockList:", err);
+    return res.status(500).json({
+        success: false,
+        message: "Error fetching stock data",
+        detail: String(err),
+        });
+    }
 });
 
 app.post("/api/updatePrice", async (req, res) => {
