@@ -1,5 +1,7 @@
 Download Node, MongoDB
 
+git clone Sprint-2-Repo-URL
+
 npm install
 
 create .env file
