@@ -1,9 +1,8 @@
 /**
  * @jest-environment jsdom
  */
-const path = require('path');
-
-describe('portfolio loadPortfolio', () => {
+describe('portfolio loadPortfolio function', () => {
+    // Make Mock DOM for Jest Enviroment and set mock response console.error
     beforeEach(() => {
         // Mock HTML Elements to test content changes
         document.body.innerHTML = `
@@ -18,6 +17,8 @@ describe('portfolio loadPortfolio', () => {
         jest.resetModules();
         // Lets the test run without worrying about console.error 
         // console.error is part of our js code that catches thrown errors
+        // We dont really care about testing the function
+        // We mock the results to test for fetch failures
         jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -35,8 +36,8 @@ describe('portfolio loadPortfolio', () => {
         // Mock the fetch response needed for porfolio to load data
         fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => mockUser });
 
-        const portfolio = require(path.resolve(__dirname, '..', 'public', 'portfolio.js'));
-        await portfolio.loadPortfolio();
+        const modules = require('../public/portfolio');
+        await modules.loadPortfolio();
         // Real user with no stocks have different content in HTML elements
         expect(document.getElementById('username').textContent).toBe("alice's Portfolio");
         expect(document.getElementById('available-funds').textContent).toBe('$100.50');
@@ -59,8 +60,8 @@ describe('portfolio loadPortfolio', () => {
         // Mock the fetch response needed for porfolio to load data
         fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => mockUser });
 
-        const portfolio = require(path.resolve(__dirname, '..', 'public', 'portfolio.js'));
-        await portfolio.loadPortfolio();
+        const modules = require('../public/portfolio');
+        await modules.loadPortfolio();
         // Check element changes are made after JSON data is returned from server
         expect(document.getElementById('username').textContent).toBe("bob's Portfolio");
         expect(document.getElementById('available-funds').textContent).toBe('$42.00');
@@ -76,8 +77,8 @@ describe('portfolio loadPortfolio', () => {
     test('user session not set sends to login page', async () => {
         fetch = jest.fn().mockResolvedValue({ ok: false, status: 401, json: async () => ({}) });
 
-        const portfolio = require(path.resolve(__dirname, '..', 'public', 'portfolio.js'));
-        await portfolio.loadPortfolio();
+        const modules = require('../public/portfolio');
+        await modules.loadPortfolio();
 
         expect(window.location.pathname).toBe('/');
     });
@@ -85,8 +86,8 @@ describe('portfolio loadPortfolio', () => {
     test('server request failures', async () => {
         fetch = jest.fn().mockRejectedValue(new Error('network'));
 
-        const portfolio = require(path.resolve(__dirname, '..', 'public', 'portfolio.js'));
-        await portfolio.loadPortfolio();
+        const modules = require('../public/portfolio');
+        await modules.loadPortfolio();
 
         const tbody = document.getElementById('holdings-body');
         expect(tbody.textContent).toContain('Error loading portfolio');

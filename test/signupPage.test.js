@@ -22,15 +22,14 @@ describe('Signup Form Submission', () => {
     });
     // Test for succussful registration
     test('shows success message and schedules redirect on successful registration', async () => {
-        // Make sure event.preventDefault doesnt stop test from running
-        // Also check that its called in our JS file
+        // Mock fetch response from server
         const mockFetch = jest.fn(() =>
             Promise.resolve({
                 ok: true,
                 json: () => ({ message: 'Registered', redirect: '/dashboard' }),
             })
         );
-
+        // Make sure event.preventDefault doesnt stop test from running is called
         const event = { preventDefault: jest.fn() };
         await handleSignup(event, signupForm, signupMessage, mockFetch);
 
@@ -41,6 +40,7 @@ describe('Signup Form Submission', () => {
     });
     // Test for missing inputs
     test('shows invalid inputs to registering', async () => {
+        // Mock fetch response from server
         const mockFetch = jest.fn(() =>
             Promise.resolve({
                 ok: false,
