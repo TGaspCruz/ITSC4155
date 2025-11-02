@@ -46,24 +46,6 @@ app.post('/login', async (req, res) => {
         console.error('Error in /login:', error);
         res.status(500).json({ success: false, message: 'Error logging in. Please try again later.' });
     }
-    req.session.user = { username: user.username, email: user.email };
-    // const user = await User.findOne({ email: email, password: password });
-    // if (!user) {
-    //     return res.status(401).json({ success: false, message: 'Email not associated with account or incorrect password' });
-    // }
-    // req.session.user = {username: user.username, email: user.email};
-    return res.status(200).json({
-      success: true,
-      message: "Login successful",
-      redirect: "/dashboard",
-    });
-  } catch (error) {
-    console.error("Error in /login:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error logging in. Please try again later.",
-    });
-  }
 });
 
 app.post("/register", (req, res) => {
@@ -250,20 +232,6 @@ app.get("/api/getFunds", async (req, res) => {
 // Return the logged-in user's info and portfolio
 app.get('/api/user', async (req, res) => {
     try {
-        if (!req.session.user || !req.session.user.email) {
-            return res.status(401).json({ success: false, message: 'Not logged in' });
-        }
-
-        const user = await User.findOne({ username: req.session.user.username, email: req.session.user.email });
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-        return res.json({ success: true, username: user.username, portfolio: user.portfolio });
-    } catch (err) {
-        console.error('Error in /api/user:', err);
-        return res.status(500).json({ success: false, message: 'Error fetching user data', detail: String(err) });
-    }
-
     const user = await User.findOne({
       username: req.session.user.username,
       email: req.session.user.email,
@@ -309,35 +277,18 @@ app.get('/api/search/:ticker', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
         }
         // Demo Key
-        //const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=tesco&apikey=demo`);
-        const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`);
+        const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=tesco&apikey=demo`);
+        //const searchResponse = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`);
         if (!searchResponse.ok) {
             throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
         }
         const stockListMatches = await searchResponse.json();
         console.log('Fetched search results:', stockListMatches);
-        return res.json({ success: true, bestMatches: stockListMatches.bestMatches || [] });
+        return res.json({ success: true, bestMatches: stockListMatches.bestMatches});
     } catch (err) {
         console.error('Error in /api/search:', err);
         return res.status(500).json({ success: false, message: 'Error performing search', detail: String(err) });
     }
-    const searchResponse = await fetch(
-      `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${ticker}&apikey=${process.env.API_KEY}`
-    );
-    if (!searchResponse.ok) {
-      throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
-    }
-    const searchJson = await searchResponse.json();
-    console.log("Fetched search results:", searchJson);
-    return res.json({ success: true, results: searchJson.bestMatches || [] });
-  } catch (err) {
-    console.error("Error in /api/search:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Error performing search",
-      detail: String(err),
-    });
-  }
 });
 
 app.get('/api/quote/:ticker', async (req, res) => {
@@ -347,8 +298,8 @@ app.get('/api/quote/:ticker', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
         }
         // Demo Key
-        //const quoteResponse = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
-        const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.API_KEY}`);
+        const quoteResponse = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
+        //const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.API_KEY}`);
         if (!quoteResponse.ok) {
             throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
         }
@@ -368,7 +319,7 @@ app.get("/api/stockList", async (req, res) => {
   try {
     // Demokey
     const stockListResponse = await fetch("https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=demo");
-    //const stockListResponse = await fetch(`https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${process.env.API_KEY}`);
+    // const stockListReRponse = await fetch(`https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${process.env.API_KEY}`);
     if (!stockListResponse.ok) {
       throw new Error(`AlphaVantage HTTP ${stockListResponse.status}`);
     }

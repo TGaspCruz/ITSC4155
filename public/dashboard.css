@@ -39,10 +39,12 @@ nav a:hover {
   display: flex;
   gap: 2em;
   justify-content: center;
+  flex: 1 1 0;
+  flex-wrap: wrap;
 }
 
 .left-column,
-.right-column {
+.right-column, .middle-column {
   background-color: white;
   padding: 1em;
   border-radius: 8px;
@@ -53,7 +55,7 @@ nav a:hover {
   text-align: center;
   flex-direction: column;
   justify-content: center;
-  flex: 1 1 0;
+  
 }
 
 .left-column h2 {
