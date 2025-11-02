@@ -1,11 +1,9 @@
 /**
  * @jest-environment jsdom
  */
-const path = require('path');
-
 describe('advanceSearch functions', () => {
 	let modules;
-
+	// Make Mock DOM for Jest Enviroment and set modules to contain functions to test
 	beforeEach(() => {
 		// Mock hTML elements that displays to user
 		// Reset in order to test data changes to elements
@@ -41,7 +39,7 @@ describe('advanceSearch functions', () => {
         // We need to keep reimportant modules in advanceSearch.js
         // Then resetting mock for other test
 		jest.resetModules();
-		modules = require(path.resolve(__dirname, '..', 'public', 'advanceSearch.js'));
+		modules = require('../public/advanceSearch');
 	});
 
 	afterEach(() => {
@@ -193,16 +191,16 @@ describe('advanceSearch functions', () => {
         expect(document.getElementById('input-box').value).toBe('');
         expect(document.getElementById('searchResults').style.display).toBe('none');
     });
-
-	test('getStockRecommendations does nothing and hides results for short input', () => {
+	// Test that the li items in list are hidden when input is either reduced to 1/0 or start with 1/0 characters
+	test('getStockRecommendations hides results when input is less than 2', () => {
 		// For short inputs, hideResults should clear the list and hide the results container
 		const ul = document.getElementById('result-list');
-		ul.innerHTML = '<li>temp</li>';
+		ul.innerHTML = '<li>IBM - IBM</li>';
 		modules.getStockRecommendations('A');
 		expect(ul.childNodes.length).toBe(0);
 		expect(document.getElementById('searchResults').style.display).toBe('none');
 	});
-
+	// Test that hideResults removes li items when called
 	test('hideResults clears the result list and hides container', () => {
 		const ul = document.getElementById('result-list');
 		ul.innerHTML = '<li>IBM - IBM</li>';

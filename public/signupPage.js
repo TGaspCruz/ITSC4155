@@ -1,6 +1,7 @@
 const signupForm = document.getElementById("signupForm");
 const signupMessage = document.getElementById('signupMessage');
 // if statement needed for Jest to not have error working with JS file
+// Something about Jest Enviroment being different causing issues
 if (signupForm) {
     signupForm.addEventListener('submit', (e) => handleSignup(e, signupForm, signupMessage));
 }

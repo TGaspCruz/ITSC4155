@@ -15,12 +15,12 @@ jest.mock('mongoose', () => {
     };
 });
 
-// Mock the User model so that we can test with mock user data
+// Mock the User model module so that we can test with mock user data
 // Can mock the functions to further test responses
 // Mock the user functionality such as save
 jest.mock('../models/user.model');
 
-// Mock user session to test different scenarios needing sessions 
+// Mock user session module to test different scenarios needing sessions 
 jest.mock('express-session', () => {
     return () => (req, res, next) => {
         // Test for user session in different testing cases

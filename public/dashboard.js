@@ -31,8 +31,13 @@ function closeForm() {
   document.getElementById("trade-form").style.display = "none";
   document.getElementById("buyButton").style.display = "block";
 }
+// function closeForm() {
+//     document.getElementById("trade-form").style.display = "none";
+// }
 
-searchBtn.addEventListener('click', async () => {
+searchBtn.addEventListener('click', handleSearchButtonClick);
+
+async function handleSearchButtonClick() {
     try {
         const ticker = tickerInput.value.toUpperCase();
         console.log(ticker);
@@ -43,7 +48,7 @@ searchBtn.addEventListener('click', async () => {
         // Real implementation
         const response = await fetch(`/api/quote/${ticker}`);
         if (!response.ok) {
-            throw new Error(`AlphaVantage HTTP ${searchResponse.status}`);
+            throw new Error(`AlphaVantage HTTP ${response.status}`);
         }
         const stockData = await response.json();
         console.log(stockData);
@@ -61,7 +66,6 @@ searchBtn.addEventListener('click', async () => {
             throw new Error(`Unable to make recieve funds`);
         }
         const availableFundsJson = await availableFundsResponse.json();
-        console.log(availableFundsJson);
         availableFundsBuy.textContent = `Available Funds: $${availableFundsJson.availableFunds.toFixed(2)}`;
         usersAvailableFunds = availableFundsJson.availableFunds.toFixed(2);
         showForm("buy");
@@ -71,7 +75,7 @@ searchBtn.addEventListener('click', async () => {
     } catch (error) {
         console.error('Error fetching stock data:', error);
     }
-})
+}
 
 // Basic logout (Requires further implementation)
 document.getElementById('logoutBtn')?.addEventListener('click', async () => {
@@ -100,8 +104,10 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
 //     }
 // });
 
-document.getElementById('trade-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
+document.getElementById('trade-form')?.addEventListener('submit', (e) => handleBuyFormSubmit(e));
+
+async function handleBuyFormSubmit(event) {
+    event.preventDefault();
     const qty = Number(document.getElementById('quantity').value);
     const price = Number(document.getElementById('hiddenPrice').value);
     const ticker = document.getElementById('hiddenTicker').value;
@@ -123,7 +129,7 @@ document.getElementById('trade-form')?.addEventListener('submit', async (e) => {
         const payload = await resp.json();
         if (!resp.ok || !payload.success) {
             buyMessage.style.color = 'red';
-            buyMessage.textContent = payload.message || 'Purchase failed';
+            buyMessage.textContent = payload.message;
             return;
         }
         buyMessage.style.color = 'green';
@@ -134,7 +140,7 @@ document.getElementById('trade-form')?.addEventListener('submit', async (e) => {
         buyMessage.style.color = 'red';
         buyMessage.textContent = 'Network error during purchase';
     }
-});
+}
 
 
 // if (buyBtn) {
@@ -335,3 +341,5 @@ async function fetchStockData() {
 // getFunds();
 // setInterval(getFunds, 2000);
 window.onload = fetchStockData;
+
+module.exports = { fetchStockData, handleBuyFormSubmit, handleSearchButtonClick};
