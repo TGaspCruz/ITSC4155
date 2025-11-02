@@ -3,16 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="dashboard.css" />
   </head>
   <body>
     <header>
       <h1>&#128200; Stock Dashboard</h1>
-      <!-- <h1 id="portfolio-value">Portfolio Value: $0</h1>
-      <p id="invested"></p> -->
       <nav>
-        <a  class="navLink" href="dashboard.html">Dashboard</a>
+        <a class="navLink" href="dashboard.html">Dashboard</a>
         <a class="navLink" href="portfolio.html">Portfolio</a>
         <a class="navLink" href="advanceSearch.html">Advance Search</a>
       </nav>
@@ -21,40 +19,170 @@
     <main>
       <div class="dashboard">
         <section class="left-column">
-            <h2>Top Stock Gainers</h2>
-            <table id="TopGainerTable"></table>
+          <h2>Top Stock Gainers</h2>
+          <table id="TopGainerTable"></table>
 
-            <h2>Top Stock Losers</h2>
-            <table id="TopLosersTable"></table>
+          <h2>Top Stock Losers</h2>
+          <table id="TopLosersTable"></table>
 
-            <h2>Most Actively Traded Stocks</h2>
-            <table id="TopActivelyTraded"></table>
-            <canvas id="priceChart" width="400" height="100"></canvas>
+          <h2>Most Actively Traded Stocks</h2>
+          <table id="TopActivelyTraded"></table>
+          <canvas id="priceChart" width="400" height="100"></canvas>
         </section>
         <section class="right-column">
-            <h2>Trade Center</h2>
-            <input type="text" id="ticker" placeholder="Enter stock ticker" maxlength="5"/>
-            <button id="searchBtn">Search</button>
-            <!-- <button id="buyButton" class="buyButton">Buy</button> -->
-            <div id="trade-form" class="form-popup" style="display: none;">
-                <p id="searchedTickerPrice"></p>
-                <h3 id="form-title">Trade Stock</h3>
-                <form id="trade-form" action="/api/buyStock" method="POST">
-                <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" required />
-                <p id="available-funds-buy">Available funds:</p>
-                <!-- Hidden inputs to include ticker and price in the POST -->
-                <input type="hidden" id="hiddenTicker" name="ticker" />
-                <input type="hidden" id="hiddenPrice" name="price" />
+          <h1 id="returnPercentage"></h1>
+          <p>Investment Value</p>
 
-                <button id="buyBtn" type="submit" style="background-color: green;">Buy</button>
-                <p id="trade-message" style="margin-top:.5rem;"></p>
-                </form>
-            </div>
+          <h3 id="return"></h3>
+          <p>Current Gain/loss</p>
+
+          <div
+            style="
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin-top: 20px;
+              margin-bottom: 30px;
+              background: #f8f9fa;
+              border: 1px solid #ddd;
+              border-radius: 8px;
+              padding: 20px;
+              box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+              width: 90%;
+              max-width: 700px;
+              margin-left: auto;
+              margin-right: auto;
+            "
+          >
+            <canvas
+              id="myChart"
+              style="width: 100%; max-width: 650px; height: 350px"
+            ></canvas>
+          </div>
+
+          <h2>Trade Center</h2>
+
+          <input type="text" id="ticker" placeholder="Enter stock ticker" />
+
+          <button id="searchBtn">Search</button>
+          <button id="buyButton" class="buyButton">Buy</button>
+
+          <p id="searchedTickerPrice"></p>
+          <div id="trade-form" class="form-popup">
+            <h3 id="form-title">Trade Stock</h3>
+
+            <form action="/api/buyStock" method="POST">
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                min="1"
+                required
+                oninput="this.value = Math.abs(this.value); if(this.value < 1) this.value='';"
+              />
+
+              <p id="available-funds-buy">Available funds:</p>
+
+              <input type="hidden" id="hiddenTicker" name="ticker" />
+              <input type="hidden" id="hiddenPrice" name="price" />
+
+              <button id="buyBtn" type="submit">Buy</button>
+            </form>
+          </div>
         </section>
       </div>
-      <!-- <canvas id="priceChart" width="500" height="100"></canvas> -->
     </main>
+
+    <script>
+      let portfolioValue = 0;
+
+      async function getStocks() {
+        portfolioValue = 0;
+        const res = await fetch("/api/getStocks");
+        const data = await res.json();
+        if (data.success) {
+          data.stocks.forEach((stock) => {
+            const marketValue = (stock.quantity * stock.avgPrice).toFixed(2);
+            portfolioValue += parseFloat(marketValue);
+          });
+        }
+      }
+
+      window.addEventListener("load", () => {
+        getFunds();
+        getStocks();
+      });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="dashboard.js"></script>
+    <script>
+      const data = {
+        labels: [],
+        datasets: [
+          {
+            label: "Holdings",
+            data: [],
+          },
+        ],
+      };
+
+      const config = {
+        type: "line",
+        data: data,
+      };
+
+      function updateChart() {
+        data.labels.push(new Date().toLocaleTimeString());
+        data.datasets[0].data.push(portfolioValue);
+        myChart.update();
+      }
+
+      const ctx = document.getElementById("myChart").getContext("2d");
+      const myChart = new Chart(ctx, config);
+
+      setInterval(updateChart, 1000);
+      setInterval(getStocks, 1000);
+
+      async function updatePercent() {
+        portfolioValue = 0;
+        const res = await fetch("/api/getStocks");
+        const data = await res.json();
+        if (data.success) {
+          portfolioValue = 0;
+          data.stocks.forEach((stock) => {
+            const marketValue = stock.quantity * stock.avgPrice;
+            portfolioValue += marketValue;
+          });
+        }
+
+        const res2 = await fetch("/api/getFunds");
+        const data2 = await res2.json();
+        if (data2.success) {
+          const totalMoney = data2.availableFunds + portfolioValue;
+          const returns = totalMoney - 1000;
+
+          document.getElementById("returnPercentage").textContent =
+            "$" + portfolioValue.toFixed(2);
+
+          const returnElement = document.getElementById("return");
+          if (portfolioValue === 0) {
+            returnElement.textContent =
+              "$ +" + (data2.availableFunds - 1000).toFixed(2);
+          } else if (returns > 0) {
+            returnElement.textContent = "+ $" + returns.toFixed(2);
+          } else if (returns === 0) {
+            returnElement.textContent = "$" + returns.toFixed(2);
+          } else {
+            returnElement.textContent = "- $" + Math.abs(returns).toFixed(2);
+          }
+        } else {
+          console.error("Failed to fetch funds:", data2.message);
+        }
+      }
+
+      setInterval(updatePercent, 1000);
+    </script>
+    <script type="module" src="stockUpdates.mjs"></script>
   </body>
-  <script src="dashboard.js"></script>
 </html>

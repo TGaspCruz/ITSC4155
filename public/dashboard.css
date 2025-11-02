@@ -128,6 +128,10 @@ button:hover {
   color: white;
 }
 
+#table-container {
+  display: flex;
+  justify-content: center;
+}
 .gain { 
     color: #4CAF50; 
 }
@@ -157,8 +161,8 @@ button:hover {
 } 
 
 table {
-    background-color: white;
-    color: black;
+  background-color: white;
+  color: black;
 }
 
 th {
@@ -200,17 +204,17 @@ th {
 /* Advanace Search Page */
 
 .advance-search-main {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 2em;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 2em;
 }
 
 .search-container {
-    width: 600px;
-    background: #fff;
-    border-radius: 5px;
-    align-self: center;
+  width: 600px;
+  background: #fff;
+  border-radius: 5px;
+  align-self: center;
 }
 
 /* Make search results overlay instead of affecting layout */
@@ -236,18 +240,18 @@ th {
 }
 
 .row {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 #input-box {
-    flex: 1;
-    height: 50px;
-    background: transparent;
-    border: 0;
-    outline: 0;
-    font-size: 18px;
-    color: #333;
+  flex: 1;
+  height: 50px;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font-size: 18px;
+  color: #333;
 }
 
 
@@ -265,7 +269,7 @@ th {
 }
 
 #searchResults ul li:hover {
-    background: #4a6c96;
+  background: #4a6c96;
 }
 
 .stock-container {
@@ -289,7 +293,8 @@ th {
   gap: 6px;
 }
 
-.stock-container p, .stock-container h2 {
+.stock-container p,
+.stock-container h2 {
   margin: 0;
 }
 
@@ -319,12 +324,26 @@ th {
   min-width: 80px; 
 }
 
-#TopGainerTable, #TopLosersTable, #TopActivelyTraded {
+#TopGainerTable,
+#TopLosersTable,
+#TopActivelyTraded {
   border: 1px solid black;
   background-color: #bfbdc7;
   text-align: center;
 }
 
-#TopGainerTable th, #TopLosersTable th, #TopActivelyTraded th {
+#TopGainerTable th,
+#TopLosersTable th,
+#TopActivelyTraded th {
   text-decoration: underline;
+}
+
+#portfolio-value {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+#funds {
+  padding: 10px;
 }

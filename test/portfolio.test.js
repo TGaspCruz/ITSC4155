@@ -22,19 +22,21 @@ describe('portfolio loadPortfolio function', () => {
         jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-    // Test that when user has no stocks, the table 
-    test('shows no holdings when stocks empty', async () => {
-        // Mock the API JSON data returned from our API 
-        const mockUser = {
-            success: true,
-            username: 'alice',
-            portfolio: { availableFunds: 100.5, stocks: [] }
-        };
-        // Mock the fetch response needed for porfolio to load data
-        fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => mockUser });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  // Test that when user has no stocks, the table
+  test("shows no holdings when stocks empty", async () => {
+    // Mock the API JSON data returned from our API
+    const mockUser = {
+      success: true,
+      username: "alice",
+      portfolio: { availableFunds: 100.5, stocks: [] },
+    };
+    // Mock the fetch response needed for porfolio to load data
+    fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => mockUser });
 
         const modules = require('../public/portfolio');
         await modules.loadPortfolio();
@@ -47,18 +49,20 @@ describe('portfolio loadPortfolio function', () => {
         expect(tbody.textContent).toContain('No Stock holdings');
     });
 
-    test('stocks are shown if User owns stock', async () => {
-        // Mock the API JSON data returned from our API 
-        const mockUser = {
-            success: true,
-            username: 'bob',
-            portfolio: {
-                availableFunds: 42,
-                stocks: [ { ticker: 'FOO', quantity: 2, avgPrice: 10.0 } ]
-            }
-        };
-        // Mock the fetch response needed for porfolio to load data
-        fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => mockUser });
+  test("stocks are shown if User owns stock", async () => {
+    // Mock the API JSON data returned from our API
+    const mockUser = {
+      success: true,
+      username: "bob",
+      portfolio: {
+        availableFunds: 42,
+        stocks: [{ ticker: "FOO", quantity: 2, avgPrice: 10.0 }],
+      },
+    };
+    // Mock the fetch response needed for porfolio to load data
+    fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => mockUser });
 
         const modules = require('../public/portfolio');
         await modules.loadPortfolio();
@@ -74,22 +78,24 @@ describe('portfolio loadPortfolio function', () => {
         expect(document.getElementById('total-invested').textContent).toBe('$20.00');
     });
 
-    test('user session not set sends to login page', async () => {
-        fetch = jest.fn().mockResolvedValue({ ok: false, status: 401, json: async () => ({}) });
+  test("user session not set sends to login page", async () => {
+    fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: false, status: 401, json: async () => ({}) });
 
         const modules = require('../public/portfolio');
         await modules.loadPortfolio();
 
-        expect(window.location.pathname).toBe('/');
-    });
+    expect(window.location.pathname).toBe("/");
+  });
 
-    test('server request failures', async () => {
-        fetch = jest.fn().mockRejectedValue(new Error('network'));
+  test("server request failures", async () => {
+    fetch = jest.fn().mockRejectedValue(new Error("network"));
 
         const modules = require('../public/portfolio');
         await modules.loadPortfolio();
 
-        const tbody = document.getElementById('holdings-body');
-        expect(tbody.textContent).toContain('Error loading portfolio');
-    });
+    const tbody = document.getElementById("holdings-body");
+    expect(tbody.textContent).toContain("Error loading portfolio");
+  });
 });
