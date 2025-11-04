@@ -19,15 +19,23 @@
     <main>
       <div class="dashboard">
         <section class="left-column">
-          <h2>Top Stock Gainers</h2>
-          <table id="TopGainerTable"></table>
-
-          <h2>Top Stock Losers</h2>
-          <table id="TopLosersTable"></table>
-
-          <h2>Most Actively Traded Stocks</h2>
-          <table id="TopActivelyTraded"></table>
-          <canvas id="priceChart" width="400" height="100"></canvas>
+          <div class="tab">
+            <button class="stock-tab active">Stock Gainers</button>
+            <button class="stock-tab">Stock Losers</button>
+            <button class="stock-tab">Most Active</button>
+          </div>
+          <div class="stock-table active">
+            <h2>Top Stock Gainers</h2>
+            <table id="TopGainerTable"></table>
+          </div>
+          <div class="stock-table">
+            <h2>Top Stock Losers</h2>
+            <table id="TopLosersTable"></table>
+          </div>
+          <div class="stock-table">
+            <h2>Most Actively Traded</h2>
+            <table id="TopActivelyTraded"></table>
+          </div>
         </section>
         <section class="middle-column">
           <h1 id="returnPercentage"></h1>
@@ -100,7 +108,7 @@
       }
 
       window.addEventListener("load", () => {
-        getFunds();
+        //getFunds();
         getStocks();
       });
     </script>

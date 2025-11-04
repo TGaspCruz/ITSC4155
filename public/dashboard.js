@@ -180,6 +180,24 @@ async function fetchStockData() {
     }
 }
 
+const tablinks = document.getElementsByClassName("stock-tab");
+const tablinksArray = Array.from(tablinks); 
+const tabcontent = document.getElementsByClassName("stock-table");
+const tabContentArray = Array.from(tabcontent);
+tablinksArray.forEach((tab, index) => {
+    tab.addEventListener('click', (e) => openTab(e, index))
+});
+
+function openTab(evt, index) {
+  const currentActiveTab = document.querySelector(".stock-tab.active");
+  const currentActiveTable = document.querySelector(".stock-table.active");
+    currentActiveTab.classList.toggle("active");
+    currentActiveTable.classList.toggle("active");
+
+    tablinksArray[index].classList.toggle("active");
+    tabContentArray[index].classList.toggle("active");
+}
+
 window.onload = fetchStockData;
 
 module.exports = { fetchStockData, handleBuyFormSubmit, handleSearchButtonClick};
