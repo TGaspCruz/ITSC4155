@@ -1,3 +1,4 @@
+const { request } = require("express");
 const mongoose = require("mongoose");
 
 const UserSchema = mongoose.Schema({
@@ -30,6 +31,15 @@ const UserSchema = mongoose.Schema({
         ticker: { type: String, required: true },
         quantity: { type: Number, required: true, min: 0 },
         avgPrice: { type: Number, required: true, min: 0 },
+      },
+    ],
+  },
+  watchlist: {
+    stocks: [
+      {
+        ticker: { type: String, required: true },
+        currentPrice: { type: Number, required: true, min: 0 },
+        change: { type: Number, required: true, min: 0 },
       },
     ],
   },
