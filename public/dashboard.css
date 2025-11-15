@@ -246,7 +246,7 @@ th {
 
 /* Advanace Search Page */
 
-.advance-search-main {
+.advance-search-main, .watchlist-main {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -296,7 +296,6 @@ th {
   font-size: 18px;
   color: #333;
 }
-
 
 #searchResults ul {
   padding: 0;
@@ -389,4 +388,32 @@ th {
 
 #funds {
   padding: 10px;
+}
+
+.stocks-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 700px;
+    margin: auto;
+    width: 100%;
+    gap: 1rem;
+}
+.stock-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: auto;
+    background-color: rgb(183, 179, 179);
+    border-radius: 6px;
+    padding: 1rem;
+    width: 100%;
+    max-width: 600px;
+}
+.delete-x {
+    font-size: 20px;
+}
+.delete-x:hover {
+    text-decoration: underline;
+    font-weight: bold;
+    cursor: pointer;
 }

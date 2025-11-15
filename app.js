@@ -262,7 +262,7 @@ app.get('/api/quote/:ticker', async (req, res) => {
     try {
         const ticker = req.params.ticker;
         if (!ticker || typeof ticker !== 'string' || ticker.length < 1) {
-        return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
+            return res.status(400).json({ success: false, message: 'Invalid ticker parameter' });
         }
         const symbol = ticker.toUpperCase();
 
@@ -280,7 +280,7 @@ app.get('/api/quote/:ticker', async (req, res) => {
             '09. change': existing.change_amount.toString(),
             '10. change percent': existing.change_percent
         };
-        return res.json({ success: true, quote });
+            return res.json({ success: true, quote });
         }
 
         // Not fresh or missing: fetch from upstream and upsert
@@ -301,23 +301,26 @@ app.get('/api/quote/:ticker', async (req, res) => {
             };
             return res.json({ success: true, quote, note: 'Returned cached stale data due to upstream error' });
         }
-        throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
+            throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
         }
         const quoteJson = await quoteResponse.json();
+        console.log(quoteJson);
         const global = quoteJson?.['Global Quote'];
-        if (!quoteJson || Object.keys(quoteJson['Global Quote']).length === 0) {
-        return res.json({ success: false, message: "Ticker Symbol Not Found " });
+        console.log(global);
+        if (!global) return res.json({ success: false, message: "No more API call done" });
+        if (!quoteJson || Object.keys(global).length === 0) {
+            return res.json({ success: false, message: "Ticker Symbol Not Found " });
         }
 
         // Map fields (AlphaVantage returns strings)
         const parsed = {
-        symbol: (global['01. symbol']).toUpperCase(),
-        open: parseFloat(global['02. open']) || 0,
-        high: parseFloat(global['03. high']) || 0,
-        low: parseFloat(global['04. low']) || 0,
-        price: parseFloat(global['05. price']) || 0,
-        change_amount: parseFloat(global['09. change']) || 0,
-        change_percent: (global['10. change percent'])
+            symbol: (global['01. symbol']).toUpperCase(),
+            open: parseFloat(global['02. open']) || 0,
+            high: parseFloat(global['03. high']) || 0,
+            low: parseFloat(global['04. low']) || 0,
+            price: parseFloat(global['05. price']) || 0,
+            change_amount: parseFloat(global['09. change']) || 0,
+            change_percent: (global['10. change percent'])
         };
 
         // Upsert into DB
@@ -438,6 +441,96 @@ app.post("/api/updatePrice", async (req, res) => {
 
         res.json({ success: true });
     } else console.error("Error updating stocks");
+});
+
+app.get("/api/user/watchlist", async (req, res) => {
+    try {
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({ success: false, message: 'Not logged in' });
+        }
+
+        const user = await User.findOne({ username: req.session.user.username, email: req.session.user.email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        return res.json({ success: true, watchlist: user.watchlist.stocks});
+    } catch (err) {
+        console.error('Error in /api/user/watchlist:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching user watchlist', detail: String(err) });
+    }
+});
+
+app.post('/api/user/addWatchlistItem', async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({ success: false, message: "Unauthorized" });
+        }
+
+        const { ticker } = req.body;
+        if (!ticker) {
+            return res.status(400).json({ success: false, message: "Ticker is required" });
+        }
+
+        // Find user by session email
+        const user = await User.findOne({ email: req.session.user.email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        // Check if ticker already exists in watchlist
+        const alreadyExists = user.watchlist.stocks.some(stock => stock.ticker === ticker);
+        if (alreadyExists) {
+            return res.status(400).json({ success: false, message: "Stock already in watchlist" });
+        }
+
+        // Add new stock to watchlist
+        user.watchlist.stocks.push({ ticker });
+
+        // Save changes
+        await user.save();
+
+        res.json({
+            success: true,
+            message: "Stock added to watchlist",
+            watchlist: user.watchlist.stocks
+        });
+    } catch (err) {
+        console.error('Error in /api/user/addWatchlistItem', err);
+        res.status(500).json({ success: false, message: 'Error adding stock', detail: String(err) });
+    }
+});
+
+// DELETE /api/user/watchlist/:ticker
+app.delete('/api/user/watchlist/:ticker', async (req, res) => {
+    try {
+        if (!req.session.user) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+        }
+
+        const { ticker } = req.params;
+
+        // Find user by session email
+        const user = await User.findOne({ email: req.session.user.email });
+        if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        // Remove stock from watchlist
+        user.watchlist.stocks = user.watchlist.stocks.filter(
+            stock => stock.ticker !== ticker
+        );
+
+        await user.save();
+
+        res.json({
+            success: true,
+            message: `Removed ${ticker} from watchlist`,
+            watchlist: user.watchlist.stocks
+        });
+    } catch (err) {
+        console.error('Error in DELETE /api/user/watchlist/:ticker', err);
+        res.status(500).json({ success: false, message: 'Error removing stock', detail: String(err) });
+    }
 });
 
 module.exports = app;

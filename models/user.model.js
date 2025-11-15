@@ -38,8 +38,8 @@ const UserSchema = mongoose.Schema({
     stocks: [
       {
         ticker: { type: String, required: true },
-        currentPrice: { type: Number, required: true, min: 0 },
-        change: { type: Number, required: true, min: 0 },
+        // currentPrice: { type: Number, required: true, min: 0 },
+        // change: { type: Number, required: true, min: 0 },
       },
     ],
   },

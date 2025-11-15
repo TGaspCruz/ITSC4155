@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advance Search</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <header>
+    <h1>Watchlist</h1>
+    <nav>
+        <a class="navLink" href="dashboard.html">Dashboard</a>
+        <a class="navLink" href="portfolio.html">Portfolio</a>
+        <a class="navLink" href="advanceSearch.html">Advance Search</a>
+        <a class="navLink" href="watchlist.html">Watchlist</a>
+    </nav>
+    <button id="logoutBtn">Logout</button>
+    </header>
+    <main class="watchlist-main">
+        <div class="search-container">
+            <div class="row">
+                <input type="text" id="input-box" placeholder="Enter stock ticker" autocomplete="off" maxlength="5">
+                <button id="searchButton">+ add</button>
+            </div>
+        </div>
+        <div class="stocks-container">
+            
+        </div>
+    </main>
+    <script src="watchlist.js"></script>
+</body>
+</html>
