@@ -1,4 +1,4 @@
-/* Styles for dashboard page */
+/* Overall styles for each page */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -31,6 +31,21 @@ nav a:hover {
   text-decoration: underline;
 }
 
+button {
+  background-color: rgb(0, 170, 255);
+  color: rgb(0, 0, 0);
+  border: none;
+  padding: 0.5em 1em;
+  margin-right: 0.5em;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+#logoutBtn {
+  margin-left: 20px;
+}
+/* Styles for dashboard page */
 .dashboard {
   padding: 2em;
 }
@@ -69,7 +84,7 @@ nav a:hover {
   justify-content: center;
 }
 
-/* Style the buttons that are used to open the tab content */
+/* Tab button styles for market table movement */
 .tab button {
   background-color: rgb(81, 0, 255);
   display: flex;
@@ -86,12 +101,10 @@ nav a:hover {
   font-weight: bold;
 }
 
-/* Change background color of buttons on hover */
 .tab button:hover {
   background-color: #413061;
 }
 
-/* Create an active/current tablink class */
 .tab button.active {
   background-color: #ff0000;
 }
@@ -125,21 +138,6 @@ input[type="number"] {
   border: 1px solid #ccc;
 }
 
-button {
-  background-color: rgb(0, 170, 255);
-  color: rgb(0, 0, 0);
-  border: none;
-  padding: 0.5em 1em;
-  margin-right: 0.5em;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 20px;
-}
-
-#logoutBtn {
-  margin-left: 20px;
-}
-
 .buyButton {
   background-color: green;
 }
@@ -161,9 +159,9 @@ button:hover {
 }
 
 #priceChart {
-  border: 1px solid #ccc; /* border color and thickness */
-  background-color: #f9f9f9; /* background fill */
-  border-radius: 8px; /* rounded corners */
+  border: 1px solid #ccc; 
+  background-color: #f9f9f9; 
+  border-radius: 8px; 
 }
 /* Styles for portfolio page */
 .portfolio-main {
@@ -192,10 +190,11 @@ button:hover {
     padding: 15px;
     border-radius: 5px;
     text-align: center;
+    font-size: 16px;
+    font-weight: bold;
 }
 .summary-item h2 {
-    margin-top: 0;
-    font-size: 1.1em;
+    margin-top: 0; 
 }
 
 #table-container{
@@ -260,7 +259,6 @@ th {
   align-self: center;
 }
 
-/* Make search results overlay instead of affecting layout */
 .search-container {
   position: relative;
   z-index: 30;
@@ -268,7 +266,7 @@ th {
 
 #searchResults {
   position: absolute;
-  top: calc(100% + 8px); /* sits just below the input row */
+  top: calc(100% + 8px); 
   left: 0;
   right: 0;
   width: 100%;
@@ -323,7 +321,7 @@ th {
   flex-direction: column;
   gap: 12px;
 }
-/* keep stock container visually behind the search overlay */
+
 .stock-container {
   position: relative;
   z-index: 10;
@@ -380,16 +378,10 @@ th {
   text-decoration: underline;
 }
 
-#portfolio-value {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
 #funds {
   padding: 10px;
 }
-
+/* Watchlist Page Syles*/
 .stocks-container {
     display: flex;
     flex-direction: column;
@@ -403,15 +395,15 @@ th {
     flex-direction: row;
     justify-content: space-between;
     margin: auto;
-    background-color: rgb(183, 179, 179);
+    background: rgb(37, 53, 61);
     border-radius: 6px;
     padding: 1rem;
     width: 100%;
     max-width: 600px;
+    color: white;
+    font-size: 30px;
 }
-.delete-x {
-    font-size: 20px;
-}
+
 .delete-x:hover {
     text-decoration: underline;
     font-weight: bold;

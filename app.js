@@ -167,7 +167,7 @@ app.post("/api/buyStock", async (req, res) => {
 app.post("/api/sellStock", async (req, res) => {
         if (!req.session.user) return res.status(401).json({ success: false });
 
-        const { ticker, price, quantity } = req.body;
+        const { ticker, price, quantity, avgPrice } = req.body;
         const user = await User.findOne({ email: req.session.user.email });
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
@@ -180,11 +180,12 @@ app.post("/api/sellStock", async (req, res) => {
         const totalValue = price * quantity;
         user.portfolio.availableFunds += totalValue;
 
+        const realizedGainLoss = (price - avgPrice) * quantity;
+        user.portfolio.realizedGainLoss += realizedGainLoss;
         // Adjust quantity
         stock.quantity -= Number(quantity);
         if (stock.quantity <= 0) {
-                // Remove stock from portfolio
-                user.portfolio.stocks = user.portfolio.stocks.filter(s => s.ticker !== ticker);
+            user.portfolio.stocks = user.portfolio.stocks.filter(s => s.ticker !== ticker);
         }
         await user.save();
         res.json({ success: true, message: "Successful sell"});
@@ -270,7 +271,7 @@ app.get('/api/quote/:ticker', async (req, res) => {
         const oneDayMs = 24 * 60 * 60 * 1000;
         const existing = await Stock.findOne({ symbol });
         if (existing && (Date.now() - new Date(existing.lastRefresh).getTime()) < oneDayMs) {
-        // Return in the same shape as AlphaVantage GLOBAL_QUOTE to avoid client changes
+        // Data from our DB
         const quote = {
             '01. symbol': existing.symbol,
             '02. open': existing.open.toString(),
@@ -283,12 +284,12 @@ app.get('/api/quote/:ticker', async (req, res) => {
             return res.json({ success: true, quote });
         }
 
-        // Not fresh or missing: fetch from upstream and upsert
+        // Data is old, call API for fresh data
         //const apiKey = process.env.API_KEY || 'demo';
         //const quoteResponse = await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo");
         const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(symbol)}&apikey=${process.env.API_KEY}`);
         if (!quoteResponse.ok) {
-        // If we have stale data, return it as fallback
+        // API fails, send whatever we have in DB
         if (existing) {
             const quote = {
             '01. symbol': existing.symbol,
@@ -305,46 +306,37 @@ app.get('/api/quote/:ticker', async (req, res) => {
         }
         const quoteJson = await quoteResponse.json();
         console.log(quoteJson);
-        const global = quoteJson?.['Global Quote'];
-        console.log(global);
-        if (!global) return res.json({ success: false, message: "No more API call done" });
-        if (!quoteJson || Object.keys(global).length === 0) {
+        const quote = quoteJson?.['Global Quote'];
+        console.log(quote);
+        // API calls are used up if quote is empty
+        if (!quote) return res.json({ success: false, message: "No more API call done" });
+        if (!quoteJson || Object.keys(quote).length === 0) {
             return res.json({ success: false, message: "Ticker Symbol Not Found " });
         }
 
-        // Map fields (AlphaVantage returns strings)
-        const parsed = {
-            symbol: (global['01. symbol']).toUpperCase(),
-            open: parseFloat(global['02. open']) || 0,
-            high: parseFloat(global['03. high']) || 0,
-            low: parseFloat(global['04. low']) || 0,
-            price: parseFloat(global['05. price']) || 0,
-            change_amount: parseFloat(global['09. change']) || 0,
-            change_percent: (global['10. change percent'])
+        // Setup data needed to insert in mongoDB
+        const mongoQuoteObject = {
+            symbol: (quote['01. symbol']),
+            open: parseFloat(quote['02. open']),
+            high: parseFloat(quote['03. high']),
+            low: parseFloat(quote['04. low']),
+            price: parseFloat(quote['05. price']),
+            change_amount: parseFloat(quote['09. change']),
+            change_percent: (quote['10. change percent'])
         };
 
-        // Upsert into DB
-        await Stock.findOneAndUpdate({ symbol: parsed.symbol }, { 
-        symbol: parsed.symbol,
-        open: parsed.open,
-        high: parsed.high,
-        low: parsed.low,
-        price: parsed.price,
-        change_amount: parsed.change_amount,
-        change_percent: parsed.change_percent,
-        lastRefresh: new Date()
+        // DB update with new data fetched from API
+        await Stock.findOneAndUpdate({ symbol: mongoQuoteObject.symbol }, { 
+            symbol: mongoQuoteObject.symbol,
+            open: mongoQuoteObject.open,
+            high: mongoQuoteObject.high,
+            low: mongoQuoteObject.low,
+            price: mongoQuoteObject.price,
+            change_amount: mongoQuoteObject.change_amount,
+            change_percent: mongoQuoteObject.change_percent,
+            lastRefresh: new Date()
         }, { upsert: true, new: true });
 
-        // Return in AlphaVantage shape
-        const quote = {
-        '01. symbol': parsed.symbol,
-        '02. open': parsed.open.toString(),
-        '03. high': parsed.high.toString(),
-        '04. low': parsed.low.toString(),
-        '05. price': parsed.price.toString(),
-        '09. change': parsed.change_amount.toString(),
-        '10. change percent': parsed.change_percent
-        };
         return res.json({ success: true, quote });
     } catch (err) {
         console.error('Error in /api/quote:', err);
@@ -459,7 +451,7 @@ app.get("/api/user/watchlist", async (req, res) => {
         return res.status(500).json({ success: false, message: 'Error fetching user watchlist', detail: String(err) });
     }
 });
-
+// Add watchlist item to user watchlist
 app.post('/api/user/addWatchlistItem', async (req, res) => {
     try {
         if (!req.session.user) {
@@ -471,7 +463,6 @@ app.post('/api/user/addWatchlistItem', async (req, res) => {
             return res.status(400).json({ success: false, message: "Ticker is required" });
         }
 
-        // Find user by session email
         const user = await User.findOne({ email: req.session.user.email });
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
@@ -483,10 +474,7 @@ app.post('/api/user/addWatchlistItem', async (req, res) => {
             return res.status(400).json({ success: false, message: "Stock already in watchlist" });
         }
 
-        // Add new stock to watchlist
         user.watchlist.stocks.push({ ticker });
-
-        // Save changes
         await user.save();
 
         res.json({
@@ -500,7 +488,7 @@ app.post('/api/user/addWatchlistItem', async (req, res) => {
     }
 });
 
-// DELETE /api/user/watchlist/:ticker
+// remove watchlist stock item from user
 app.delete('/api/user/watchlist/:ticker', async (req, res) => {
     try {
         if (!req.session.user) {

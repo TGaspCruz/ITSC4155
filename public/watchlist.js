@@ -84,6 +84,7 @@ async function updateWatchList(ticker, currentPrices) {
         const stockChange = document.createElement("div");
         stockChange.classList.add("stock-change");
         stockChange.textContent = currentPrices.stockChanges[ticker];
+        currentPrices.stockChanges[ticker] >= 0 ? stockChange.classList.add("gain") : stockChange.classList.add("loss");
         const deleteX = document.createElement("div");
         deleteX.classList.add("delete-x");
         deleteX.textContent = "X";
@@ -125,6 +126,7 @@ async function loadWatchlist() {
             const stockChange = document.createElement("div");
             stockChange.classList.add("stock-change");
             stockChange.textContent = currentPrices.stockChanges[stock.ticker];
+            currentPrices.stockChanges[stock.ticker] >= 0 ? stockChange.classList.add("gain") : stockChange.classList.add("loss");
             const deleteX = document.createElement("div");
             deleteX.classList.add("delete-x");
             deleteX.textContent = "X";
