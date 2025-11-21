@@ -1,5 +1,6 @@
 // Fetch and display logged in user portfolio data
 async function loadPortfolio() {
+    console.log("LoadPortfolio");
     try {
         const res = await fetch('/api/user');
         if (!res.ok) {
@@ -129,7 +130,7 @@ async function loadPortfolio() {
         document.getElementById('available-funds').textContent = `$${user.portfolio.availableFunds.toFixed(2)}`;
         document.getElementById('total-invested').textContent = `$${totalInvestment.toFixed(2)}`;
         const balance = Number(user.portfolio.availableFunds.toFixed(2)) + Number(stats.totalValue.toFixed(2));
-        document.getElementById('balance').textContent = `$${balance}`;
+        document.getElementById('balance').textContent = `$${balance.toFixed(2)}`;
     } catch (err) {
         console.error('Failed to load portfolio', err);
         document.getElementById('holdings-body').innerHTML = '<tr><td colspan="5">Error loading portfolio</td></tr>';
@@ -138,16 +139,6 @@ async function loadPortfolio() {
 
 // Initial load of portfolio data
 loadPortfolio();
-// Logout handler
-document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-    try {
-        await fetch('/logout', { method: 'POST' });
-    } catch (err) {
-        console.error('Logout failed', err);
-    } finally {
-        window.location.href = '/';
-    }
-});
 
 //Fetch current prices for all stocks
 async function fetchCurrentPrices(stocks) {
@@ -185,5 +176,18 @@ function calculatePortfolioStats(stocks, currentPrices) {
         totalInvestment,
     };
 }
+
+document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try {
+    const response = await fetch('/logout', { method: 'POST' });
+    // ignore response and redirect to login (Testing Logout)
+    const responseJson = await response.json();
+    setTimeout(() => { window.location.href = responseJson.redirect; }, 300);
+    } catch (err) {
+        console.error('Logout failed', err);
+        window.location.href = '/';
+    }
+});
+
 
 module.exports = { loadPortfolio };

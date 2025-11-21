@@ -305,15 +305,15 @@ app.get('/api/quote/:ticker', async (req, res) => {
         const existing = await Stock.findOne({ symbol });
         if (existing && (Date.now() - new Date(existing.lastRefresh).getTime()) < oneDayMs) {
         // Data from our DB
-        const quote = {
-            '01. symbol': existing.symbol,
-            '02. open': existing.open.toString(),
-            '03. high': existing.high.toString(),
-            '04. low': existing.low.toString(),
-            '05. price': existing.price.toString(),
-            '09. change': existing.change_amount.toString(),
-            '10. change percent': existing.change_percent
-        };
+            const quote = {
+                '01. symbol': existing.symbol,
+                '02. open': existing.open.toString(),
+                '03. high': existing.high.toString(),
+                '04. low': existing.low.toString(),
+                '05. price': existing.price.toString(),
+                '09. change': existing.change_amount.toString(),
+                '10. change percent': existing.change_percent
+            };
             return res.json({ success: true, quote });
         }
 
@@ -323,26 +323,43 @@ app.get('/api/quote/:ticker', async (req, res) => {
         const quoteResponse = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(symbol)}&apikey=${process.env.API_KEY}`);
         if (!quoteResponse.ok) {
         // API fails, send whatever we have in DB
-        if (existing) {
-            const quote = {
-            '01. symbol': existing.symbol,
-            '02. open': existing.open.toString(),
-            '03. high': existing.high.toString(),
-            '04. low': existing.low.toString(),
-            '05. price': existing.price.toString(),
-            '09. change': existing.change_amount.toString(),
-            '10. change percent': existing.change_percent
-            };
-            return res.json({ success: true, quote, note: 'Returned cached stale data due to upstream error' });
-        }
-            throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
+            if (existing) {
+                const quote = {
+                '01. symbol': existing.symbol,
+                '02. open': existing.open.toString(),
+                '03. high': existing.high.toString(),
+                '04. low': existing.low.toString(),
+                '05. price': existing.price.toString(),
+                '09. change': existing.change_amount.toString(),
+                '10. change percent': existing.change_percent
+                };
+                return res.json({ success: true, quote, note: 'Returned cached stale data due to upstream error' });
+            }
+                throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
         }
         const quoteJson = await quoteResponse.json();
         console.log(quoteJson);
         const quote = quoteJson?.['Global Quote'];
         console.log(quote);
         // API calls are used up if quote is empty
-        if (!quote) return res.json({ success: false, message: "No more API call done" });
+        if (!quote) {
+            // Return whatever old data is in database if we have it
+            console.log(existing);
+            if (existing) {
+                const quote = {
+                '01. symbol': existing.symbol,
+                '02. open': existing.open.toString(),
+                '03. high': existing.high.toString(),
+                '04. low': existing.low.toString(),
+                '05. price': existing.price.toString(),
+                '09. change': existing.change_amount.toString(),
+                '10. change percent': existing.change_percent
+                };
+                return res.json({ success: true, quote, note: 'Returned cached stale data due to upstream error' });
+            }
+            return res,json({ success: false, message: "No more API call done" });_
+        }
+
         if (!quoteJson || Object.keys(quote).length === 0) {
             return res.json({ success: false, message: "Ticker Symbol Not Found " });
         }

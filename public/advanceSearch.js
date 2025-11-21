@@ -10,7 +10,7 @@ const stockOpen = document.getElementById('stock-open');
 const stockHigh = document.getElementById('stock-high');
 const stockLow = document.getElementById('stock-low');
 const stockPrice = document.getElementById('stock-price');
-const stockVolume = document.getElementById('stock-volume');
+//const stockVolume = document.getElementById('stock-volume');
 const stockChange = document.getElementById('stock-change');
 const stockChangePercent = document.getElementById('stock-change-percent');
 const tradeTicker = document.getElementById('trade-ticker');
@@ -29,6 +29,7 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         window.location.href = '/';
     }
 });
+
 // Close results if user clicks outside the search container
 document.addEventListener('click', (e) => {
     if (!searchContainer) return;
@@ -180,7 +181,7 @@ function setUpStockData(quote) {
     stockHigh.textContent = `High: $${parseFloat(quote['03. high']).toFixed(2)}`;
     stockLow.textContent = `Low: $${parseFloat(quote['04. low']).toFixed(2)}`;
     stockPrice.textContent = `Price: $${parseFloat(quote['05. price']).toFixed(2)}`;
-    stockVolume.textContent = `Volume: ${quote['06. volume']}`;
+    // stockVolume.textContent = `Volume: ${quote['06. volume']}`;
     stockChange.textContent = `Change: $${parseFloat(quote['09. change']).toFixed(2)}`;
     stockChangePercent.textContent = `Change %: ${parseFloat(quote['10. change percent']).toFixed(2)}`;
     tradeTicker.value = quote['01. symbol'] || '';

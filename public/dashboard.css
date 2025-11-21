@@ -165,8 +165,8 @@ button:hover {
 }
 /* Styles for portfolio page */
 .portfolio-main {
-  text-align: center;
-  color: white;
+    text-align: center;
+    color: white;
 }
 
 #table-container {
@@ -368,14 +368,24 @@ th {
 #TopLosersTable,
 #TopActivelyTraded {
   border: 1px solid black;
-  background-color: #bfbdc7;
+  background: rgb(37, 53, 61);
   text-align: center;
+  color: white;
+  border: 1px solid white;
+  width: max-content;
 }
 
 #TopGainerTable th,
 #TopLosersTable th,
 #TopActivelyTraded th {
-  text-decoration: underline;
+    color: black;
+    font-weight: bold;
+}
+
+#TopGainerTable td:nth-child(1), #TopGainerTable td:nth-child(5),
+#TopLosersTable td:nth-child(1), #TopLosersTable td:nth-child(5),
+#TopActivelyTraded td:nth-child(1), #TopActivelyTraded td:nth-child(5) {
+    text-align: left;
 }
 
 #funds {

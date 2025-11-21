@@ -59,32 +59,17 @@ async function handleSearchButtonClick() {
     }
 }
 
-// Basic logout (Requires further implementation)
 document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     try {
     const response = await fetch('/logout', { method: 'POST' });
     // ignore response and redirect to login (Testing Logout)
-    window.location.href = '/';
+    const responseJson = await response.json();
+    setTimeout(() => { window.location.href = responseJson.redirect; }, 300);
     } catch (err) {
-    console.error('Logout failed', err);
-    window.location.href = '/';
+        console.error('Logout failed', err);
+        window.location.href = '/';
     }
 });
-
-// buyBtn.addEventListener("click", async function () {
-//     try {
-//         const amount = document.getElementById("quantity").value;
-//         console.log(amount);
-//         const num = parseFloat(stockPrice) * amount;
-//         if (usersAvailableFunds < num) {
-//             alert("Not enough funds")
-//             return;
-//         }
-//         alert("Bought $" + num + " of stock in" + tickerInput);
-//     } catch (err) {
-//         console.log(err);
-//     }
-// });
 
 document.getElementById('trade-form')?.addEventListener('submit', (e) => handleBuyFormSubmit(e));
 
@@ -159,7 +144,7 @@ async function fetchStockData() {
                                 ? "green"
                                 : "red"
                             };">
-                                ${stock.change_percentage}
+                                ${parseFloat(stock.change_percentage).toFixed(2)}%
                             <td>${stock.volume}</td>
                             </tr>`;
             });

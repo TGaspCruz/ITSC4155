@@ -152,7 +152,6 @@ async function fetchCurrentPrices(stocks) {
     for (const stock of stocks) {
         try {
             const response = await fetch(`/api/quote/${stock.ticker}`);
-            console.log(response);
             if (!response.ok) continue;
             const data = await response.json();
             console.log(data);
@@ -167,5 +166,18 @@ async function fetchCurrentPrices(stocks) {
     console.log(prices);
     return prices;
 };
+
+
+document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try {
+    const response = await fetch('/logout', { method: 'POST' });
+    // ignore response and redirect to login (Testing Logout)
+    const responseJson = await response.json();
+    setTimeout(() => { window.location.href = responseJson.redirect; }, 300);
+    } catch (err) {
+        console.error('Logout failed', err);
+        window.location.href = '/';
+    }
+});
 
 window.onload = loadWatchlist;
