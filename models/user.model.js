@@ -48,6 +48,12 @@ const UserSchema = mongoose.Schema({
       },
     ],
   },
+  currentLoginTime: {
+    type: Date, default: Date.now, index: true 
+  },
+  lastLoginBonus: {
+     type: Date, default: Date.now, index: true 
+  },
 });
 
 const User = mongoose.model("User", UserSchema);

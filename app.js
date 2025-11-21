@@ -42,6 +42,17 @@ app.post('/login', async (req, res) => {
         else if (user.password !== password) {
             return res.status(401).json({ success: false, message: 'Incorrect password' });
         }
+
+        const oneDayMs = 24 * 60 * 60 * 1000;
+        
+        if (user && (Date.now() - new Date(user.lastLoginBonus).getTime()) > oneDayMs) {
+            user.lastLoginBonus = Date.now();
+            user.portfolio.availableFunds += 500;
+            console.log(user.portfolio.availableFunds);
+            console.log("Added funds");
+        }
+        user.currentLoginTime = Date.now();
+        await user.save();
         req.session.user = {username: user.username, email: user.email};
         return res.status(200).json({ success: true, message: 'Login successful', redirect: '/dashboard' });
     } catch (error) {
@@ -123,15 +134,37 @@ app.post("/register", (req, res) => {
 });
 
 // Logout route - destroys the session
-app.post("/logout", (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.error("Error destroying session:", err);
-            return res.status(500).json({ success: false, message: "Logout failed", redirect: '/'});
+app.post("/logout", async (req, res) => {
+    try {
+        const { email } = req.session.user;
+        const user = await User.findOne({ email});
+
+        if (!user) {
+            return res.status(400).json({ success: false , message: "No active session found" });
         }
-        res.clearCookie && res.clearCookie("connect.sid");
-        return res.json({ success: true, message: "Logged out", redirect: '/'});
-    });
+
+        const logoutTime = Date.now();
+        const minutes = Math.floor((logoutTime - user.currentLoginTime) / 60000);
+        const addedFunds = minutes * 5;
+        console.log(user.portfolio.availableFunds);
+        console.log(minutes);
+        console.log(addedFunds);
+        user.portfolio.availableFunds += addedFunds;
+        console.log(user.portfolio.availableFunds);
+        await user.save();
+        console.log("Funds saved");
+        req.session.destroy((err) => {
+            if (err) {
+                console.error("Error destroying session:", err);
+                return res.status(500).json({ success: false, message: "Logout failed", redirect: '/'});
+            }
+            res.clearCookie && res.clearCookie("connect.sid");
+            return res.json({ success: true, message: "Logged out", redirect: '/'});
+        });
+    } catch (error) {
+        console.error('Error in /logout:', error);
+        res.status(500).json({ success: false, message: 'Error logging out.', redirect: '/' });
+    }
 });
 
 //buy stock request. when the user clicks the confirm button to buy stock, this is called.
@@ -366,7 +399,7 @@ app.get("/api/stockList", async (req, res) => {
         }
         const stockListJson = await stockListResponse.json();
 
-        // Update cache (create or replace single document)
+        // Update cache by making new document
         if (!cache) {
             cache = new StockListCache({ data: stockListJson, lastRefresh: new Date() });
         } else {
