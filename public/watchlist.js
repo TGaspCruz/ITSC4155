@@ -181,3 +181,5 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
 });
 
 window.onload = loadWatchlist;
+
+module.exports = { fetchCurrentPrices, loadWatchlist, updateWatchList, addWatchlistItem, deleteWatchListItem };

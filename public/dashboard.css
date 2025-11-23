@@ -86,7 +86,6 @@ button {
 
 /* Tab button styles for market table movement */
 .tab button {
-  background-color: rgb(81, 0, 255);
   display: flex;
   flex-direction: row;
   border: 2px solid black;
@@ -97,16 +96,12 @@ button {
   align-items: center;
   justify-content: center;
   flex: 1;
-  color: white;
   font-weight: bold;
 }
 
-.tab button:hover {
-  background-color: #413061;
-}
-
 .tab button.active {
-  background-color: #ff0000;
+  background-color: rgb(7, 28, 219);
+  color: white;
 }
 
 .stock-table {
@@ -369,10 +364,7 @@ th {
 #TopLosersTable,
 #TopActivelyTraded {
   border: 1px solid black;
-  background: rgb(37, 53, 61);
   text-align: center;
-  color: white;
-  border: 1px solid white;
   width: max-content;
 }
 
@@ -428,28 +420,34 @@ th {
   margin: auto;
   margin-top: 2rem;
   border-radius: 4px;
+  overflow: auto;
 }
 
 .filters {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
 .filter-btn {
   padding: 0.5rem 1rem;
-  margin-right: 0.5rem;
+  margin-left: 0.5rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
 }
 
+.filter-btn.active {
+  background-color: rgb(7, 28, 219);
+  color: white;
+}
+
 #sortDropdown {
   padding: 0.5rem;
   border-radius: 4px;
   border: 1px solid #ccc;
+  margin-left: auto;
 }
 
 .transaction-table {

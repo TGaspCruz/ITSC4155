@@ -34,6 +34,11 @@ const UserSchema = mongoose.Schema({
         avgPrice: { type: Number, required: true, min: 0 },
       },
     ],
+
+    realizedGainLoss: {
+    type: Number,
+    default: 0,
+    },
   },
 
   transactions: [
@@ -46,11 +51,6 @@ const UserSchema = mongoose.Schema({
       timestamp: { type: Date, default: Date.now }
     }
   ],
-
-  realizedGainLoss: {
-    type: Number,
-    default: 0,
-  },
 
   watchlist: {
     stocks: [
