@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <header>
+    <h1>&#8987;Transaction History</h1>
+    <nav>
+        <a  class="navLink" href="dashboard.html">Dashboard</a>
+        <a class="navLink" href="portfolio.html">Portfolio</a>
+        <a class="navLink" href="advanceSearch.html">Advance Search</a>
+        <a class="navLink" href="watchlist.html">Watchlist</a>
+        <a class="navLink" href="transactionHistory.html">History</a>
+    </nav>
+    <button id="logoutBtn">Logout</button>
+    </header>
+    <main class="transaction-history-main">
+        <section class="filters">
+            <button class="filter-btn active" data-type="all">All</button>
+            <button class="filter-btn" data-type="buy">Buy</button>
+            <button class="filter-btn" data-type="sell">Sell</button>
+            <select id="sortDropdown">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+            </select>
+        </section>
+
+        <table class="transaction-table" border="1">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Stock</th>
+                    <th>Type</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="transaction-body">
+                
+            </tbody>
+        </table>
+    </main>
+    <script src="transactionHistory.js"></script>
+</body>
+</html>

@@ -80,7 +80,7 @@ async function updateWatchList(ticker, currentPrices) {
         stockSymbol.textContent = ticker;
         const stockPrice = document.createElement("div");
         stockPrice.classList.add("stock-Price");
-        stockPrice.textContent = currentPrices.stockPrices[ticker];
+        stockPrice.textContent = `$${parseFloat(currentPrices.stockPrices[ticker]).toFixed(2)}`;
         const stockChange = document.createElement("div");
         stockChange.classList.add("stock-change");
         stockChange.textContent = currentPrices.stockChanges[ticker];
@@ -122,7 +122,7 @@ async function loadWatchlist() {
             stockSymbol.textContent = stock.ticker;
             const stockPrice = document.createElement("div");
             stockPrice.classList.add("stock-Price");
-            stockPrice.textContent = currentPrices.stockPrices[stock.ticker];
+            stockPrice.textContent = `$${parseFloat(currentPrices.stockPrices[stock.ticker]).toFixed(2)}`;
             const stockChange = document.createElement("div");
             stockChange.classList.add("stock-change");
             stockChange.textContent = currentPrices.stockChanges[stock.ticker];

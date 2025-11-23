@@ -147,8 +147,6 @@ app.post("/logout", async (req, res) => {
         const minutes = Math.floor((logoutTime - user.currentLoginTime) / 60000);
         const addedFunds = minutes * 5;
         console.log(user.portfolio.availableFunds);
-        console.log(minutes);
-        console.log(addedFunds);
         user.portfolio.availableFunds += addedFunds;
         console.log(user.portfolio.availableFunds);
         await user.save();
@@ -193,6 +191,16 @@ app.post("/api/buyStock", async (req, res) => {
     } else {
         user.portfolio.stocks.push({ ticker, quantity: Number(quantity), avgPrice: Number(price) });
     }
+    
+    user.transactions.push({
+        type: 'buy',
+        ticker,
+        quantity: Number(quantity),
+        price: Number(price),
+        total: Number(totalCost),
+        timestamp: new Date()
+    });
+
     await user.save();
     res.json({ success: true, message: "Successful buy", availableFunds: user.portfolio.availableFunds });
 });
@@ -215,6 +223,17 @@ app.post("/api/sellStock", async (req, res) => {
 
         const realizedGainLoss = (price - avgPrice) * quantity;
         user.portfolio.realizedGainLoss += realizedGainLoss;
+
+        // Record transaction
+        
+        user.transactions.push({
+            type: 'sell',
+            ticker,
+            quantity: Number(quantity),
+            price: Number(price),
+            total: Number(totalValue),
+            timestamp: new Date()
+        });
         // Adjust quantity
         stock.quantity -= Number(quantity);
         if (stock.quantity <= 0) {
@@ -338,7 +357,6 @@ app.get('/api/quote/:ticker', async (req, res) => {
                 throw new Error(`AlphaVantage HTTP ${quoteResponse.status}`);
         }
         const quoteJson = await quoteResponse.json();
-        console.log(quoteJson);
         const quote = quoteJson?.['Global Quote'];
         console.log(quote);
         // API calls are used up if quote is empty
@@ -432,13 +450,12 @@ app.get("/api/stockList", async (req, res) => {
             if (stockListJson.top_losers && Array.isArray(stockListJson.top_losers)) lists.push(...stockListJson.top_losers);
             if (stockListJson.most_actively_traded && Array.isArray(stockListJson.most_actively_traded)) lists.push(...stockListJson.most_actively_traded);
             for (const s of lists) {
-                // Expect s has keys ticker, price, change_amount, change_percentage, volume
                 const sym = (s.ticker).toUpperCase();
                 if (!sym) continue;
                 const price = Number(s.price);
-                const open = Number(s.open);
-                const high = Number(s.high);
-                const low = Number(s.low);
+                const open = Number(s.price);
+                const high = Number(s.price);
+                const low = Number(s.price);
                 const change_amount = Number(s.change_amount);
                 const change_percent = s.change_percentage;
                 await Stock.findOneAndUpdate({ symbol: sym }, {
@@ -568,6 +585,30 @@ app.delete('/api/user/watchlist/:ticker', async (req, res) => {
     } catch (err) {
         console.error('Error in DELETE /api/user/watchlist/:ticker', err);
         res.status(500).json({ success: false, message: 'Error removing stock', detail: String(err) });
+    }
+});
+// Query URL to determine the transaction type and sort
+app.get('/api/transactions', async (req, res) => {
+    try {
+        if (!req.session.user || !req.session.user.email) {
+            return res.status(401).json({ success: false, message: 'Not logged in' });
+        }
+        const { type, sort } = req.query;
+        const user = await User.findOne({ email: req.session.user.email });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        let transactions = (user.transactions);
+        if (type && (type === 'buy' || type === 'sell')) {
+            transactions = transactions.filter(t => t.type === type);
+        }
+        
+        transactions.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+        if (sort === 'oldest') transactions.reverse();
+
+        return res.json({ success: true, transactions });
+    } catch (err) {
+        console.error('Error in /api/transactions:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching transactions', detail: String(err) });
     }
 });
 

@@ -20,7 +20,7 @@ async function loadPortfolio() {
             document.getElementById('portfolio-value').textContent = `$0.00`;
             document.getElementById('total-gain-loss').textContent = `${user.portfolio.realizedGainLoss.toFixed(2)}`;
             document.getElementById('balance').textContent = `$${user.portfolio.availableFunds.toFixed(2)}`;
-            tbody.innerHTML = '<tr><td colspan="7">No Stock holdings</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8">No Stock holdings</td></tr>';
             return;
         }
 
@@ -133,7 +133,7 @@ async function loadPortfolio() {
         document.getElementById('balance').textContent = `$${balance.toFixed(2)}`;
     } catch (err) {
         console.error('Failed to load portfolio', err);
-        document.getElementById('holdings-body').innerHTML = '<tr><td colspan="5">Error loading portfolio</td></tr>';
+        document.getElementById('holdings-body').innerHTML = '<tr><td colspan="8">Error loading portfolio</td></tr>';
     }
 }
 
