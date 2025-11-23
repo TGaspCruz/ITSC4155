@@ -11,12 +11,6 @@ async function showForm(type) {
     document.getElementById("trade-form").style.display = "block";
 }
 
-function closeForm() {
-  document.getElementById("trade-form").style.display = "none";
-  document.getElementById("buyButton").style.display = "block";
-}
-
-
 searchBtn.addEventListener('click', handleSearchButtonClick);
 
 async function handleSearchButtonClick() {
@@ -27,15 +21,13 @@ async function handleSearchButtonClick() {
             alert("Enter a ticker symbol");
             return;
         }
-        // Real implementation
+        
         const response = await fetch(`/api/quote/${ticker}`);
         if (!response.ok) {
             throw new Error(`AlphaVantage HTTP ${response.status}`);
         }
         const stockData = await response.json();
-        console.log(stockData);
-        console.log(!stockData);
-        console.log(!stockData.success);
+        
         if (!stockData || !stockData.success) {
             alert(`${stockData.message}`);
             return;

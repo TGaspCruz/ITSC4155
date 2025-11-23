@@ -54,8 +54,6 @@ async function addWatchlistItem() {
             body: JSON.stringify({ ticker })
         });
         const payload = await resp.json();
-        console.log(payload.success);
-        console.log(!resp.ok);
         document.getElementById('input-box').value = "";
         if (!payload.success) {
             alert(payload.message);

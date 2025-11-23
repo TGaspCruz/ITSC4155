@@ -167,45 +167,53 @@ app.post("/logout", async (req, res) => {
 
 //buy stock request. when the user clicks the confirm button to buy stock, this is called.
 app.post("/api/buyStock", async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ success: false });
+    try {
+        if (!req.session.user) return res.status(401).json({ success: false });
 
-    const { ticker, price, quantity } = req.body;
-    const user = await User.findOne({ email: req.session.user.email });
-    const totalCost = price * quantity;
+        const { ticker, price, quantity } = req.body;
+        const user = await User.findOne({ email: req.session.user.email });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        const totalCost = price * quantity;
 
-    if (user.portfolio.availableFunds < totalCost) {
-        return res.status(400).json({ success: false, message: 'Insufficient funds' });
+        if (user.portfolio.availableFunds < totalCost) {
+            return res.status(400).json({ success: false, message: 'Insufficient funds' });
+        }
+
+        user.portfolio.availableFunds -= totalCost;
+
+        // Aggregate stocks by ticker
+        let stock = user.portfolio.stocks.find(s => s.ticker === ticker);
+        if (stock) {
+            // Calculate new avgPrice
+            const prevTotal = stock.avgPrice * stock.quantity;
+            const newTotal = price * quantity;
+            const newQty = stock.quantity + Number(quantity);
+            stock.avgPrice = (prevTotal + newTotal) / newQty;
+            stock.quantity = newQty;
+        } else {
+            user.portfolio.stocks.push({ ticker, quantity: Number(quantity), avgPrice: Number(price) });
+        }
+        
+        user.transactions = user.transactions || [];
+        user.transactions.push({
+            type: 'buy',
+            ticker,
+            quantity: Number(quantity),
+            price: Number(price),
+            total: Number(totalCost),
+            timestamp: new Date()
+        });
+
+        await user.save();
+        return res.json({ success: true, message: "Successful buy", availableFunds: user.portfolio.availableFunds });
+    } catch (err) {
+        console.error('Error in /api/buyStock:', err);
+        return res.status(500).json({ success: false, message: 'Error processing buy', detail: String(err) });
     }
-
-    user.portfolio.availableFunds -= totalCost;
-
-    // Aggregate stocks by ticker
-    let stock = user.portfolio.stocks.find(s => s.ticker === ticker);
-    if (stock) {
-        // Calculate new avgPrice
-        const prevTotal = stock.avgPrice * stock.quantity;
-        const newTotal = price * quantity;
-        const newQty = stock.quantity + Number(quantity);
-        stock.avgPrice = (prevTotal + newTotal) / newQty;
-        stock.quantity = newQty;
-    } else {
-        user.portfolio.stocks.push({ ticker, quantity: Number(quantity), avgPrice: Number(price) });
-    }
-    
-    user.transactions.push({
-        type: 'buy',
-        ticker,
-        quantity: Number(quantity),
-        price: Number(price),
-        total: Number(totalCost),
-        timestamp: new Date()
-    });
-
-    await user.save();
-    res.json({ success: true, message: "Successful buy", availableFunds: user.portfolio.availableFunds });
 });
 
 app.post("/api/sellStock", async (req, res) => {
+    try {
         if (!req.session.user) return res.status(401).json({ success: false });
 
         const { ticker, price, quantity, avgPrice } = req.body;
@@ -221,11 +229,12 @@ app.post("/api/sellStock", async (req, res) => {
         const totalValue = price * quantity;
         user.portfolio.availableFunds += totalValue;
 
+        user.portfolio.realizedGainLoss = user.portfolio.realizedGainLoss || 0;
         const realizedGainLoss = (price - avgPrice) * quantity;
         user.portfolio.realizedGainLoss += realizedGainLoss;
 
         // Record transaction
-        
+        user.transactions = user.transactions || [];
         user.transactions.push({
             type: 'sell',
             ticker,
@@ -240,7 +249,11 @@ app.post("/api/sellStock", async (req, res) => {
             user.portfolio.stocks = user.portfolio.stocks.filter(s => s.ticker !== ticker);
         }
         await user.save();
-        res.json({ success: true, message: "Successful sell"});
+        return res.json({ success: true, message: "Successful sell"});
+    } catch (err) {
+        console.error('Error in /api/sellStock:', err);
+        return res.status(500).json({ success: false, message: 'Error processing sell', detail: String(err) });
+    }
 });
 
 //get the users funds

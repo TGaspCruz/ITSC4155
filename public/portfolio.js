@@ -40,7 +40,7 @@ async function loadPortfolio() {
         let totalInvestment = 0;
         for (const stock of stocks) {
             const tr = document.createElement('tr');
-            const currentPrice = currentPrices[stock.ticker] ?? stock.avgPrice ?? 0;
+            const currentPrice = currentPrices[stock.ticker];
             const totalStockValue = stock.quantity * currentPrice;
             const stockInvestment = stock.quantity * stock.avgPrice;
             totalInvestment += stock.quantity * (stock.avgPrice);
@@ -148,7 +148,7 @@ async function fetchCurrentPrices(stocks) {
             const response = await fetch(`/api/quote/${stock.ticker}`);
             const data = await response.json();
             if (data.success && data.quote) {
-                prices[stock.ticker] = parseFloat(data.quote['05. price'] || data.quote.price || 0);
+                prices[stock.ticker] = parseFloat(data.quote['05. price']);
             }
         } catch (error) {
             console.error(`Error fetching price for ${stock.ticker}:`, error);
@@ -163,7 +163,7 @@ function calculatePortfolioStats(stocks, currentPrices) {
     let totalInvestment = 0;
     
     stocks.forEach(stock => {
-        const currentPrice = currentPrices[stock.ticker] || stock.avgPrice;
+        const currentPrice = currentPrices[stock.ticker];
         const investment = stock.quantity * stock.avgPrice;
         const currentValue = stock.quantity * currentPrice;
         

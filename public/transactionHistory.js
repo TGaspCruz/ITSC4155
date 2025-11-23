@@ -47,14 +47,13 @@ function renderTransactions(transactions){
     for (const transaction of transactions){
         const tr = document.createElement('tr');
         const date = new Date(transaction.timestamp).toLocaleString();
-        const total = ((Number(transaction.total)) * Number(transaction.quantity || 0)).toFixed(2);
         tr.innerHTML = `
             <td>${date}</td>
             <td>${transaction.ticker}</td>
             <td>${transaction.type}</td>
             <td>${transaction.quantity}</td>
             <td>$${Number(transaction.price).toFixed(2)}</td>
-            <td>$${total}</td>
+            <td>$${Number(transaction.total).toFixed(2)}</td>
         `;
         tbody.appendChild(tr);
     }
@@ -72,7 +71,6 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     }
 });
 
-loadAndRender()
-
+loadAndRender();
 
 module.exports = { fetchTransactions, renderTransactions, loadAndRender };

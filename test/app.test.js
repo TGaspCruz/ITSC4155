@@ -5,8 +5,6 @@ const request = require('supertest');
 const app = require('../app');
 const User = require('../models/user.model');
 
-// Pretend DB connection made so that tests can run without error
-// Bypass need to have actual DB connection
 jest.mock('mongoose', () => {
     const actualMongoose = jest.requireActual('mongoose');
     return {
@@ -20,22 +18,22 @@ jest.mock('mongoose', () => {
 // Mock the user functionality such as save
 jest.mock('../models/user.model');
 
-// Mock user session module to test different scenarios needing sessions 
+// Mock express-session middleware with conditional control
 jest.mock('express-session', () => {
     return () => (req, res, next) => {
-        // Test for user session in different testing cases
+        // Allow tests to flag "no logged-in user" cases
         if (req.headers['_forcenosessionuser'] === 'true') {
-            req.session = {};
+            req.session = {}; // simulate not logged in
         } else {
             req.session = {
                 user: { email: 'test@example.com', username: 'testuser' },
-                destroy: (cb) => cb && cb(),
+                destroy: (cb) => cb && cb(), // simulate working destroy()
         };
         }
         next();
     };
 });
-// Testing Login and Register API
+
 describe('Login/Register Routes', () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -109,10 +107,15 @@ describe('Login/Register Routes', () => {
     });
     // Test correct email and password match found in DB sends user to Dashboard
     test('POST /login succeeds with valid credentials', async () => {
+        const mockSave = jest.fn().mockResolvedValue(true);
         User.findOne.mockResolvedValue({
             username: 'testuser',
             email: 'test@email.com',
             password: 'password123',
+            // Make lastLoginBonus old so bonus branch could run if code checks it
+            lastLoginBonus: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+            portfolio: { availableFunds: 0, stocks: [] },
+            save: mockSave,
         });
 
         const res = await request(app)
@@ -245,6 +248,9 @@ describe('Buying/Selling Routes', () => {
 
 describe('Logout Route', () => {
     test('POST /logout clears session and returns success', async () => {
+        // ensure User.findOne returns a user with save so logout can persist funds
+        const mockUser = { portfolio: { availableFunds: 100 }, currentLoginTime: Date.now() - 60000, save: jest.fn().mockResolvedValue(true) };
+        User.findOne.mockResolvedValue(mockUser);
         const res = await request(app).post('/logout');
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);

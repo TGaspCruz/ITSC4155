@@ -59,7 +59,7 @@ describe('dashboard.js', () => {
         expect(losers.innerHTML).toContain('-0.50');
         expect(active.innerHTML).toContain('test3');
         expect(active.innerHTML).toContain('$450.78');
-        expect(active.innerHTML).toContain('+0.50');
+        expect(active.innerHTML).toContain('0.50%');
     });
     // Testing search event listener to populate HTML content when valid
     test('handleSearchButtonClick fetches quote and funds and populates form', async () => {
