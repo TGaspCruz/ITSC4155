@@ -63,7 +63,7 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     }
 });
 
-document.getElementById('trade-form')?.addEventListener('submit', (e) => handleBuyFormSubmit(e));
+document.getElementById('trade-form').addEventListener('submit', (e) => handleBuyFormSubmit(e));
 
 async function handleBuyFormSubmit(event) {
     event.preventDefault();

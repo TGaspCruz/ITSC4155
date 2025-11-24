@@ -114,7 +114,7 @@ async function makeSearchRequest(input) {
     }
 }
 // Handle trade form submission
-document.getElementById('trade-form')?.addEventListener('submit', async (e) => {
+document.getElementById('trade-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const qty = Number(document.getElementById('trade-quantity').value);
     const price = Number(document.getElementById('trade-price').value);

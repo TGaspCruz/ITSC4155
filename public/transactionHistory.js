@@ -39,7 +39,12 @@ function renderTransactions(transactions){
     tbody.innerHTML = '';
     if (!transactions || transactions.length === 0){
         const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="6">You have no buy transactions yet.</td>';
+        if (document.querySelector('.filter-btn.active').getAttribute('data-type') === "all") {
+            tr.innerHTML = `<td colspan="6">You have no transactions yet.</td>`;
+            tbody.appendChild(tr);
+            return;
+        }
+        tr.innerHTML = `<td colspan="6">You have no ${document.querySelector('.filter-btn.active').getAttribute('data-type')} transactions yet.</td>`;
         tbody.appendChild(tr);
         return;
     }

@@ -24,11 +24,11 @@ async function loadPortfolio() {
             return;
         }
 
-        // Fetch current prices for all stocks and compute overall portfolio statistics
+        // Calls for current prices and calculated summary items to be displayed
         const currentPrices = await fetchCurrentPrices(stocks);
         const stats = calculatePortfolioStats(stocks, currentPrices);
 
-        // Update portfolio summary elements (if present)
+        // Update portfolio summary elements
         document.getElementById('total-invested').textContent = `$${stats.totalInvestment.toFixed(2)}`;
         const portfolioValueEl = document.getElementById('portfolio-value');
         portfolioValueEl.textContent = `$${stats.totalValue.toFixed(2)}`;
@@ -73,8 +73,6 @@ async function loadPortfolio() {
                 </td>
             `;
             tbody.appendChild(tr);
-
-            // Wire up controls for the newly added row
             
             const sellButton = tr.querySelector('.sell-button');
             const sellControls = tr.querySelector('.sell-controls');
@@ -140,7 +138,7 @@ async function loadPortfolio() {
 // Initial load of portfolio data
 loadPortfolio();
 
-//Fetch current prices for all stocks
+// Fetch current prices for all stocks the user owns
 async function fetchCurrentPrices(stocks) {
     const prices = {};
     for (const stock of stocks) {

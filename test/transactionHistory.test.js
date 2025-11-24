@@ -47,7 +47,7 @@ describe('transactionHistory module', () => {
         module.renderTransactions([]);
         const tbody = document.getElementById('transaction-body');
         expect(tbody.childNodes.length).toBe(1);
-        expect(tbody.textContent).toContain('You have no buy transactions yet.');
+        expect(tbody.textContent).toContain('You have no transactions yet.');
     });
 
     test('renderTransactions renders rows for transactions', () => {

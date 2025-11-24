@@ -4,14 +4,11 @@ const addButton = document.getElementById("searchButton");
 addButton.addEventListener("click", addWatchlistItem);
 
 async function deleteWatchListItem(e) {
-    console.log("click");
     const deleteButton = e.currentTarget;
-    console.log(deleteButton);
     const stockItem = deleteButton.closest(".stock-item");
     const stockSymbol = stockItem.querySelector(".stock-symbol");
-    console.log(stockSymbol);
     const ticker = stockSymbol.textContent;
-    console.log(ticker);
+    
     try {
         const response = await fetch(`/api/user/watchlist/${ticker}`, {
         method: 'DELETE',
