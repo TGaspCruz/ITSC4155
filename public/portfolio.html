@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Portfolio</title>
-    <link rel="stylesheet" href="dashboard.css">
-</head>
-<body>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
     <header>
-        <h1 id="username">Portfolio</h1>
-        <nav>
-        <a  class="navLink" href="dashboard.html">Dashboard</a>
+      <h1 id="username">Portfolio</h1>
+      <nav>
+        <a class="navLink" href="dashboard.html">Dashboard</a>
         <a class="navLink" href="portfolio.html">Portfolio</a>
         <a class="navLink" href="advanceSearch.html">Advance Search</a>
-        </nav>
-        <button id="logoutBtn">Logout</button>
+        <a class="navLink" href="watchlist.html">Watchlist</a>
+        <a class="navLink" href="transactionHistory.html">History</a>
+      </nav>
+      <button id="logoutBtn">Logout</button>
     </header>
     <main class="portfolio-main">
         <section class="portfolio-summary">
@@ -31,8 +33,12 @@
                 <p id="portfolio-value"></p>
             </div>
             <div class="summary-item">
-                <h2>Total Gain/Loss</h2>
+                <h2>Realized Gain/Loss</h2>
                 <p id="total-gain-loss"></p>
+            </div>
+            <div class="summary-item">
+                <h2>Balance</h2>
+                <p id="balance"></p>
             </div>
         </section>
         <section>
@@ -45,6 +51,9 @@
                         <th>Quantity</th>
                         <th>Avg Price</th>
                         <th>Total Cost</th>
+                        <th>Current Price</th>
+                        <th>Total Market Value</th>
+                        <th>Gain/Loss</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
