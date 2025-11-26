@@ -3,88 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
+    <title>Document</title>
     <link rel="stylesheet" href="dashboard.css" />
-    <style>
-      .chart-container {
-        width: 90%;
-
-        margin: 10px auto;
-        background: #000000;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      }
-
-      .chart-container canvas {
-        width: 100% !important;
-        height: 500px !important;
-      }
-
-      .portfolio-stats {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        padding: 10px;
-        background: #606060;
-        border-radius: 8px;
-        margin-bottom: 10px;
-      }
-
-      .stat-item {
-        text-align: center;
-      }
-
-      .stat-item h1 {
-        margin: 0;
-        font-size: 2rem;
-      }
-
-      .stat-item h3 {
-        margin: 5px 0 0 0;
-      }
-
-      .stat-item p {
-        margin: 5px 0 0 0;
-        color: #ffffff;
-        font-size: 0.9rem;
-      }
-
-      .collapsible-header {
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px;
-        background: #f0f0f0;
-        border-radius: 5px;
-        margin-bottom: 10px;
-        user-select: none;
-      }
-
-      .collapsible-header:hover {
-        background: #e0e0e0;
-      }
-
-      .collapse-icon {
-        transition: transform 0.3s ease;
-      }
-
-      .collapse-icon.collapsed {
-        transform: rotate(-90deg);
-      }
-
-      .collapsible-content {
-        max-height: 1000px;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-      }
-
-      .collapsible-content.collapsed {
-        max-height: 0;
-      }
-    </style>
   </head>
   <body>
     <header>
@@ -99,24 +19,91 @@
       </nav>
       <button id="logoutBtn">Logout</button>
     </header>
+    <div class="dashboard">
+      <section class="left-column">
+        <div class="tab">
+          <button class="stock-tab active">Stock Gainers</button>
+          <button class="stock-tab">Stock Losers</button>
+          <button class="stock-tab">Most Active</button>
+        </div>
 
-    <div class="chart-container">
-      <div class="portfolio-stats">
-        <div class="stat-item">
-          <h1 id="returnPercentage"></h1>
-          <p>Investment Value</p>
+        <div class="stock-table active">
+          <div class="collapsible-header" onclick="toggleCollapse(0)">
+            <h2>Top Stock Gainers</h2>
+            <span class="collapse-icon">▼</span>
+          </div>
+          <div class="collapsible-content">
+            <table id="TopGainerTable" border="1"></table>
+          </div>
         </div>
-        <div class="stat-item">
-          <h3 id="return"></h3>
-          <p>Current Gain/Loss</p>
+
+        <div class="stock-table">
+          <div class="collapsible-header" onclick="toggleCollapse(1)">
+            <h2>Top Stock Losers</h2>
+            <span class="collapse-icon">▼</span>
+          </div>
+          <div class="collapsible-content">
+            <table id="TopLosersTable" border="1"></table>
+          </div>
         </div>
-      </div>
-      <canvas id="myChart"></canvas>
+
+        <div class="stock-table">
+          <div class="collapsible-header" onclick="toggleCollapse(2)">
+            <h2>Most Actively Traded</h2>
+            <span class="collapse-icon">▼</span>
+          </div>
+          <div class="collapsible-content">
+            <table id="TopActivelyTraded" border="1"></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="right-column">
+        <h2>Trade Center</h2>
+        <input
+          type="text"
+          id="ticker"
+          placeholder="Enter stock ticker"
+          maxlength="5"
+        />
+        <button id="searchBtn">Search</button>
+        <div id="trade-form" class="form-popup" style="display: none">
+          <p id="searchedTickerPrice"></p>
+          <h3 id="form-title">Trade Stock</h3>
+          <form id="trade-form" action="/api/buyStock" method="POST">
+            <label for="quantity">Quantity:</label>
+            <input
+              type="number"
+              id="quantity"
+              name="quantity"
+              min="1"
+              step="1"
+              required
+            />
+            <p id="available-funds-buy">Available funds:</p>
+            <input type="hidden" id="hiddenTicker" name="ticker" />
+            <input type="hidden" id="hiddenPrice" name="price" />
+            <button id="buyBtn" type="submit" style="background-color: green">
+              Buy
+            </button>
+            <p id="trade-message" style="margin-top: 0.5rem"></p>
+          </form>
+        </div>
+      </section>
     </div>
+  </body>
+  <script>
+    function toggleCollapse(index) {
+      const tables = document.querySelectorAll(".stock-table");
+      const content = tables[index].querySelector(".collapsible-content");
+      const icon = tables[index].querySelector(".collapse-icon");
 
-    <main></main>
+      content.classList.toggle("collapsed");
+      icon.classList.toggle("collapsed");
+    }
+  </script>
 
-    <script>
+  <script>
       let portfolioValue = 0;
 
       async function getStocks() {
@@ -155,61 +142,6 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-
-          interaction: {
-            mode: "index",
-            intersect: false,
-          },
-
-          plugins: {
-            legend: {
-              display: false,
-            },
-            tooltip: {
-              backgroundColor: "rgba(0,0,0,0.8)",
-              titleFont: { size: 14, weight: "bold" },
-              bodyFont: { size: 13 },
-              padding: 12,
-              cornerRadius: 4,
-              displayColors: false,
-            },
-          },
-
-          elements: {
-            line: {
-              tension: 0.25,
-              borderWidth: 5,
-              borderColor: "#00c853",
-            },
-            point: {
-              radius: 0,
-              hoverRadius: 4,
-              hoverBackgroundColor: "#ffffff",
-              hoverBorderColor: "#00c853",
-              hoverBorderWidth: 2,
-            },
-          },
-
-          scales: {
-            x: {
-              grid: {
-                display: false,
-              },
-              ticks: {
-                color: "#888",
-                maxTicksLimit: 6,
-              },
-            },
-            y: {
-              grid: {
-                color: "rgba(200, 200, 200, 0.15)",
-              },
-              ticks: {
-                color: "#888",
-                callback: (value) => "$" + value,
-              },
-            },
-          },
         },
       };
 
@@ -266,4 +198,6 @@
     </script>
     <script type="module" src="stockUpdates.mjs"></script>
   </body>
+</html>
+
 </html>
