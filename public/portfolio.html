@@ -11,6 +11,7 @@
       <h1 id="username">Portfolio</h1>
       <nav>
         <a class="navLink" href="dashboard.html">Dashboard</a>
+        <a class="navLink" href="tradeCenter.html">Trade Center</a>
         <a class="navLink" href="portfolio.html">Portfolio</a>
         <a class="navLink" href="advanceSearch.html">Advance Search</a>
         <a class="navLink" href="watchlist.html">Watchlist</a>
@@ -19,50 +20,49 @@
       <button id="logoutBtn">Logout</button>
     </header>
     <main class="portfolio-main">
-        <section class="portfolio-summary">
-            <div class="summary-item">
-                <h2>Available Funds</h2>
-                <p id="available-funds"></p>
-            </div>
-            <div class="summary-item">
-                <h2>Total Investment</h2>
-                <p id="total-invested"></p>
-            </div>
-            <div class="summary-item">
-                <h2>Portfolio Value</h2>
-                <p id="portfolio-value"></p>
-            </div>
-            <div class="summary-item">
-                <h2>Realized Gain/Loss</h2>
-                <p id="total-gain-loss"></p>
-            </div>
-            <div class="summary-item">
-                <h2>Balance</h2>
-                <p id="balance"></p>
-            </div>
-        </section>
-        <section>
-            <h2>Stock Holdings</h2>
-            <div id="table-container">
-            <table id="holdings-table" border="1" cellpadding="6">
-                <thead>
-                    <tr>
-                        <th>Ticker</th>
-                        <th>Quantity</th>
-                        <th>Avg Price</th>
-                        <th>Total Cost</th>
-                        <th>Current Price</th>
-                        <th>Total Market Value</th>
-                        <th>Gain/Loss</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="holdings-body">
-                </tbody>
-            </table>
-            </div>
-        </section>
+      <section class="portfolio-summary">
+        <div class="summary-item">
+          <h2>Available Funds</h2>
+          <p id="available-funds"></p>
+        </div>
+        <div class="summary-item">
+          <h2>Total Investment</h2>
+          <p id="total-invested"></p>
+        </div>
+        <div class="summary-item">
+          <h2>Portfolio Value</h2>
+          <p id="portfolio-value"></p>
+        </div>
+        <div class="summary-item">
+          <h2>Realized Gain/Loss</h2>
+          <p id="total-gain-loss"></p>
+        </div>
+        <div class="summary-item">
+          <h2>Balance</h2>
+          <p id="balance"></p>
+        </div>
+      </section>
+      <section>
+        <h2>Stock Holdings</h2>
+        <div id="table-container">
+          <table id="holdings-table" border="1" cellpadding="6">
+            <thead>
+              <tr>
+                <th>Ticker</th>
+                <th>Quantity</th>
+                <th>Avg Price</th>
+                <th>Total Cost</th>
+                <th>Current Price</th>
+                <th>Total Market Value</th>
+                <th>Gain/Loss</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="holdings-body"></tbody>
+          </table>
+        </div>
+      </section>
     </main>
     <script src="portfolio.js"></script>
-</body>
+  </body>
 </html>

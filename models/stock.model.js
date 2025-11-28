@@ -1,16 +1,16 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const StockSchema = new mongoose.Schema({
-    symbol: { type: String, required: true, unique: true, index: true },
-    open: { type: Number },
-    high: { type: Number },
-    low: { type: Number },
-    price: { type: Number, required: true, default: 0 },
-    change_amount: { type: Number, default: 0 },
-    change_percent: { type: String, default: '0%' },
-    lastRefresh: { type: Date, default: Date.now, index: true }
+  symbol: { type: String, required: true, unique: true, index: true },
+  open: { type: Number },
+  high: { type: Number },
+  low: { type: Number },
+  price: { type: Number, required: true, default: 0 },
+  change_amount: { type: Number, default: 0 },
+  change_percent: { type: String, default: "0%" },
+  lastRefresh: { type: Date, default: Date.now, index: true },
 });
 
-const Stock = mongoose.model('Stock', StockSchema);
+const Stock = mongoose.model("Stock", StockSchema);
 
 module.exports = Stock;
