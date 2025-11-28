@@ -6,10 +6,87 @@ require("dotenv").config();
 const User = require("./models/user.model");
 const Stock = require('./models/stock.model');
 const StockListCache = require('./models/stockListCache.model');
-
+// Connect to DB, add DEMO data if needed
 mongoose.connect("mongodb://127.0.0.1/InvestmentProjectDB")
     .then(() => {
         console.log("Database is connected successfully");
+        // Script to populate Data if collection items are empty
+        // If statement so that unit test doesn't run this code
+        if (process.env.NODE_ENV !== 'test') {
+            (async function populateDemoData() {
+                try {
+                    const userCount = await User.countDocuments();
+                    if (!userCount) {
+                        const demoUsers = [
+                            {
+                                username: 'demouser1',
+                                email: 'demo1@email.com',
+                                password: 'password123',
+                                portfolio: {
+                                    availableFunds: 1400,
+                                    stocks: [ { ticker: 'AAPL', quantity: 5, avgPrice: 150.00 } ]
+                                },
+                                watchlist: { stocks: [ { ticker: 'TSLA' } ] },
+                                transactions: [ { type: 'buy', ticker: 'AAPL', quantity: 5, price: 150.00, total: 750.00, timestamp: new Date() } ]
+                            },
+                            {
+                                username: 'demouser2',
+                                email: 'demo2@email.com',
+                                password: 'password123',
+                                portfolio: { availableFunds: 600, stocks: [ { ticker: 'TSLA', quantity: 2, avgPrice: 700.00 } ] },
+                                watchlist: { stocks: [ { ticker: 'AAPL' } ] },
+                                transactions: [ { type: 'buy', ticker: 'TSLA', quantity: 2, price: 700.00, total: 1400.00, timestamp: new Date() } ]
+                            }
+                        ];
+                        try {
+                            await User.insertMany(demoUsers);
+                            console.log('Inserted demo users');
+                        } catch (e) {
+                            console.error('Error inserting demo users:', e);
+                        }
+                    }
+
+                    const stockCount = await Stock.countDocuments();
+                    if (!stockCount) {
+                        const now = new Date();
+                        const demoStocks = [
+                            { symbol: 'AAPL', open: 276.96, high: 279.53, low: 276.63, price: 277.55, change_amount: 0.58, change_percent: '0.2094%', lastRefresh: now },
+                            { symbol: 'TSLA', open: 391.09, high: 391.09, low: 391.09, price: 391.09, change_amount: -4.14, change_percent: '-1.0475%', lastRefresh: now },
+                            { symbol: 'BA', open: 184.00, high: 188.18, low: 183.03, price: 186.92, change_amount: 4.48, change_percent: '2.4556%', lastRefresh: now },
+                            { symbol: 'AMD', open: 210.05, high: 215.5899, low: 207.00, price: 214.24, change_amount: 8.11, change_percent: '3.9344%', lastRefresh: now },
+                            { symbol: 'GOOG', open: 320.78, high: 324.99, low: 317.20, price: 320.28, change_amount: -3.36, change_percent: '-1.0382%', lastRefresh: now }
+                        ];
+                        try {
+                            await Stock.insertMany(demoStocks);
+                            console.log('Inserted demo stocks');
+                        } catch (e) {
+                            console.error('Error inserting demo stocks:', e);
+                        }
+                    }
+
+                    const existingCache = await StockListCache.findOne();
+                    if (!existingCache) {
+                        try {
+                            const resp = await fetch(`https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=demo`);
+                            if (resp && resp.ok) {
+                                const json = await resp.json();
+                                const cacheDoc = new StockListCache({ data: json, lastRefresh: new Date() });
+                                await cacheDoc.save();
+                                console.log('Seeded StockListCache from demo API');
+                            } else {
+                                const cacheDoc = new StockListCache({ data: {}, lastRefresh: new Date() });
+                                await cacheDoc.save();
+                                console.log('Created empty StockListCache (upstream unavailable)');
+                            }
+                        } catch (e) {
+                            console.error('Error seeding StockListCache:', e);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error during demo data seeding:', err);
+                }
+            })();
+        }
     })
     .catch((error) => console.log(error));
 

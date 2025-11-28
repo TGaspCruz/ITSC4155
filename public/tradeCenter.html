@@ -19,50 +19,51 @@
       </nav>
       <button id="logoutBtn">Logout</button>
     </header>
-    <div class="dashboard">
-        <section class="left-column">
-            <div class="tab">
-                <button class="stock-tab active">Stock Gainers</button>
-                <button class="stock-tab">Stock Losers</button>
-                <button class="stock-tab">Most Active</button>
-            </div>
-            <div class="stock-table active">
-                <h2>Top Stock Gainers</h2>
-                <table id="TopGainerTable" border="1"></table>
-            </div>
-            <div class="stock-table">
-                <h2>Top Stock Losers</h2>
-                <table id="TopLosersTable" border="1"></table>
-            </div>
-            <div class="stock-table">
-                <h2>Most Actively Traded</h2>
-                <table id="TopActivelyTraded" border="1"></table>
-            </div>
-            </section>
-        <section class="right-column">
-            <h2>Trade Center</h2>
-                <input type="text" id="ticker" placeholder="Enter stock ticker" maxlength="5"/>
-                <button id="searchBtn">Search</button>
-                <!-- <button id="buyButton" class="buyButton">Buy</button> -->
-                <div id="trade-form" class="form-popup" style="display: none;">
-                    <p id="searchedTickerPrice"></p>
-                    <h3 id="form-title">Trade Stock</h3>
-                    <form id="trade-form" action="/api/buyStock" method="POST">
-                    <label for="quantity">Quantity:</label>
-                    <input type="number" id="quantity" name="quantity" required />
-                    <p id="available-funds-buy">Available funds:</p>
-                    <!-- Hidden inputs to include ticker and price in the POST -->
-                    <input type="hidden" id="hiddenTicker" name="ticker" />
-                    <input type="hidden" id="hiddenPrice" name="price" />
-
-                    <button id="buyBtn" type="submit" style="background-color: green;">Buy</button>
-                    <p id="trade-message" style="margin-top:.5rem;"></p>
-                    </form>
+    <main>
+        <div class="dashboard">
+            <section class="left-column">
+                <div class="tab">
+                    <button class="stock-tab active">Stock Gainers</button>
+                    <button class="stock-tab">Stock Losers</button>
+                    <button class="stock-tab">Most Active</button>
                 </div>
-            </section>
-    </div>
-  </body>
-  <script src="dashboard.js"></script>
+                <div class="stock-table active">
+                    <h2>Top Stock Gainers</h2>
+                    <table id="TopGainerTable" border="1"></table>
+                </div>
+                <div class="stock-table">
+                    <h2>Top Stock Losers</h2>
+                    <table id="TopLosersTable" border="1"></table>
+                </div>
+                <div class="stock-table">
+                    <h2>Most Actively Traded</h2>
+                    <table id="TopActivelyTraded" border="1"></table>
+                </div>
+                </section>
+            <section class="right-column">
+                <h2>Trade Center</h2>
+                    <input type="text" id="ticker" placeholder="Enter stock ticker" maxlength="5"/>
+                    <button id="searchBtn">Search</button>
+                    <!-- <button id="buyButton" class="buyButton">Buy</button> -->
+                    <div id="trade-form" class="form-popup" style="display: none;">
+                        <p id="searchedTickerPrice"></p>
+                        <h3 id="form-title">Trade Stock</h3>
+                        <form id="trade-form" action="/api/buyStock" method="POST">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" required />
+                        <p id="available-funds-buy">Available funds:</p>
+                        <!-- Hidden inputs to include ticker and price in the POST -->
+                        <input type="hidden" id="hiddenTicker" name="ticker" />
+                        <input type="hidden" id="hiddenPrice" name="price" />
+
+                        <button id="buyBtn" type="submit" style="background-color: green;">Buy</button>
+                        <p id="trade-message" style="margin-top:.5rem;"></p>
+                        </form>
+                    </div>
+                </section>
+        </div>
+    </main>
+    <script src="dashboard.js"></script>
   </body>
 </html>
 
