@@ -3,6 +3,7 @@
  */
 describe('watchlist functions', () => {
     let module;
+    // Mock necessary DOM and functions before each test
     beforeEach(() => {
         document.body.innerHTML = `
         <input id="input-box" />
@@ -18,7 +19,7 @@ describe('watchlist functions', () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
-
+    // Changes to DOM made are what is returned from fetch
     test('fetchCurrentPrices returns parsed prices and changes', async () => {
         fetch = jest.fn((url) => {
             if (url === '/api/quote/FOO') {
@@ -31,7 +32,7 @@ describe('watchlist functions', () => {
         expect(res.stockChanges.FOO).toBeCloseTo(0.2);
         expect(global.fetch).toHaveBeenCalledWith('/api/quote/FOO');
     });
-
+    // Changes to DOM should match return data
     test('updateWatchList appends a stock item to DOM', async () => {
         const currentPrices = { stockPrices: { FOO: 4.2 }, stockChanges: { FOO: 1.1 } };
         await module.updateWatchList('FOO', currentPrices);
@@ -40,7 +41,7 @@ describe('watchlist functions', () => {
         expect(container.textContent).toContain('FOO');
         expect(container.textContent).toContain('$4.20');
     });
-
+    // DOM data should change based on returned data
     test('loadWatchlist populates stocks from API', async () => {
         fetch = jest.fn((url) => {
             if (url === '/api/user/watchlist') {
@@ -56,7 +57,7 @@ describe('watchlist functions', () => {
         expect(container.childNodes.length).toBe(1);
         expect(container.textContent).toContain('FOO');
     });
-
+    // DOM element removed
     test('deleteWatchListItem removes element on success', async () => {
         // Build a DOM element structure that deleteWatchListItem expects
         document.body.innerHTML = `<button id="searchButton"></button><div class="stocks-container"><div class="stock-item"><div class="stock-symbol">FOO</div><div class="delete-x">X</div></div></div>`;
@@ -67,7 +68,7 @@ describe('watchlist functions', () => {
         const container = document.querySelector('.stocks-container');
         expect(container.childNodes.length).toBe(0);
     });
-
+    // DOM element added 
     test('addWatchlistItem posts and updates DOM on success', async () => {
         document.getElementById('input-box').value = 'FOO';
 
@@ -92,7 +93,7 @@ describe('watchlist functions', () => {
         expect(container.textContent).toContain('$4.20');
         expect(document.getElementById('input-box').value).toBe('');
     });
-
+    // DOM remains the same
     test('addWatchlistItem alerts when ticker not found', async () => {
         document.getElementById('input-box').value = 'AAAAA';
         // quote fetch returns success:false so fetchCurrentPrices will have no prices

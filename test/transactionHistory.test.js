@@ -4,6 +4,7 @@
 
 describe('transactionHistory module', () => {
     let module;
+    // Mock necessary DOM and function before each test
     beforeEach(() => {
         // Mock DOM needed to test
         document.body.innerHTML = `
@@ -23,7 +24,7 @@ describe('transactionHistory module', () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
-
+    // Correct data returned
     test('fetchTransactions returns users transactions on success', async () => {
         // mock server response data
         const returnedTransactions = [{ timestamp: Date.now(), ticker: 'FOO', type: 'buy', quantity: 2, price: 5.00, total: 10.00 }];
@@ -36,20 +37,20 @@ describe('transactionHistory module', () => {
         expect(res.length).toBe(1);
         expect(res[0].ticker).toBe('FOO');
     });
-
+    // Correct response given on errors
     test('fetchTransactions returns empty array if response is bad', async () => {
         fetch = jest.fn().mockResolvedValue({ ok: false });
         const res = await module.fetchTransactions('buy', 'oldest');
         expect(res).toEqual([]);
     });
-
+    // Corrent DOM changes with empty list
     test('renderTransactions shows correct message with no transactions made', () => {
         module.renderTransactions([]);
         const tbody = document.getElementById('transaction-body');
         expect(tbody.childNodes.length).toBe(1);
         expect(tbody.textContent).toContain('You have no transactions yet.');
     });
-
+    // Correct table rows with data rendered in DOM
     test('renderTransactions renders rows for transactions', () => {
         const transaction = { timestamp: new Date().toISOString(), ticker: 'FOO', type: 'buy', quantity: 3, price: 2.50, total: 7.50 };
         module.renderTransactions([transaction]);
