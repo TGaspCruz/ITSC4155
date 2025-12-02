@@ -8,7 +8,6 @@
     <style>
       .chart-container {
         width: 90%;
-
         margin: 10px auto;
         background: #000000;
         border: 1px solid #ddd;
@@ -88,7 +87,7 @@
   </head>
   <body>
     <header>
-      <h1>&#128200; Dashboard</h1>
+      <h1>Dashboard</h1>
       <nav>
         <a class="navLink" href="dashboard.html">Dashboard</a>
         <a class="navLink" href="tradeCenter.html">Trade Center</a>
@@ -116,8 +115,14 @@
 
     <main></main>
 
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script type="module">
+      import { simulateStockUpdates } from "./stockUpdates.mjs";
+
       let portfolioValue = 0;
+      let chartDataLoaded = false;
+      let myChart;
 
       async function getStocks() {
         portfolioValue = 0;
@@ -131,36 +136,63 @@
         }
       }
 
-      window.addEventListener("load", () => {
-        getStocks();
-      });
-    </script>
+      async function loadChartData() {
+        try {
+          const res = await fetch("/api/getChartData");
+          const data = await res.json();
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="module" src="dashboard.js"></script>
-    <script>
-      const data = {
-        labels: [],
-        datasets: [
-          {
-            label: "Holdings",
-            data: [],
-          },
-        ],
-      };
+          if (data.success && data.chartData) {
+            chartConfig.data.labels = data.chartData.labels || [];
+            chartConfig.data.datasets[0].data = data.chartData.values || [];
+            chartDataLoaded = true;
+            console.log(
+              "Chart data loaded:",
+              chartConfig.data.labels.length,
+              "points"
+            );
+          }
+        } catch (error) {
+          console.error(":#", error);
+        }
+      }
 
-      const config = {
+      async function saveChartData() {
+        try {
+          const data = JSON.stringify({
+            labels: chartConfig.data.labels,
+            values: chartConfig.data.datasets[0].data,
+          });
+
+          await fetch("/api/saveChartData", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: data,
+          });
+        } catch (error) {
+          console.error("Error saving chart data:", error);
+        }
+      }
+
+      const chartConfig = {
         type: "line",
-        data: data,
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Holdings",
+              data: [],
+            },
+          ],
+        },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-
           interaction: {
             mode: "index",
             intersect: false,
           },
-
           plugins: {
             legend: {
               display: false,
@@ -174,7 +206,6 @@
               displayColors: false,
             },
           },
-
           elements: {
             line: {
               tension: 0.25,
@@ -189,7 +220,6 @@
               hoverBorderWidth: 2,
             },
           },
-
           scales: {
             x: {
               grid: {
@@ -213,17 +243,21 @@
         },
       };
 
-      function updateChart() {
-        data.labels.push(new Date().toLocaleTimeString());
-        data.datasets[0].data.push(portfolioValue);
-        myChart.update();
-      }
+      window.addEventListener("load", async () => {
+        await loadChartData();
+        await getStocks();
 
-      const ctx = document.getElementById("myChart").getContext("2d");
-      const myChart = new Chart(ctx, config);
+        const ctx = document.getElementById("myChart").getContext("2d");
+        myChart = new Chart(ctx, chartConfig);
 
-      setInterval(updateChart, 1000);
-      setInterval(getStocks, 1000);
+        //setInterval(updateChart, 500);
+        setInterval(getStocks, 500);
+        setInterval(simulateStockUpdates, 500);
+
+        window.addEventListener("beforeunload", () => {
+          saveChartData();
+        });
+      });
 
       async function updatePercent() {
         portfolioValue = 0;
@@ -245,6 +279,10 @@
 
           document.getElementById("returnPercentage").textContent =
             "$" + portfolioValue.toFixed(2);
+          chartConfig.data.labels.push(new Date().toLocaleTimeString());
+          chartConfig.data.datasets[0].data.push(portfolioValue);
+          myChart.update();
+          saveChartData();
 
           const returnElement = document.getElementById("return");
           if (portfolioValue === 0) {
@@ -258,24 +296,28 @@
             returnElement.textContent = "- $" + Math.abs(returns).toFixed(2);
           }
         } else {
-          console.error("Failed to fetch funds:", data2.message);
+          console.error("something wrong", data2.message);
         }
       }
 
-      setInterval(updatePercent, 1000);
-      document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+      setInterval(updatePercent, 500);
+
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", async () => {
+          await saveChartData();
+
           try {
-            const response = await fetch('/logout', { method: 'POST' });
-            // ignore response and redirect to login (Testing Logout)
+            const response = await fetch("/logout", { method: "POST" });
             const responseJson = await response.json();
-            setTimeout(() => { window.location.href = responseJson.redirect; }, 300);
-            } catch (err) {
-                console.error('Logout failed', err);
-                window.location.href = '/';
-            }
-          });
-      
+            setTimeout(() => {
+              window.location.href = responseJson.redirect;
+            }, 300);
+          } catch (err) {
+            console.error("?????????????????/", err);
+            window.location.href = "/";
+          }
+        });
     </script>
-    <script type="module" src="stockUpdates.mjs"></script>
   </body>
 </html>

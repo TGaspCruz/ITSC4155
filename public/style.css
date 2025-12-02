@@ -1,75 +1,77 @@
 body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(blue, rgb(0, 0, 150), rgb(0, 0, 100));
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(rgb(83, 83, 83), rgb(0, 0, 150), rgb(0, 0, 100));
 }
 
 div {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    width: 400px;
-    text-align: center;
+  background-color: rgb(184, 163, 163);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  text-align: center;
 }
 
-#loginForm, #signupForm {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-    text-align: left;
+#loginForm,
+#signupForm {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  text-align: left;
 }
 
 h1 {
-    margin-bottom: 1rem;
-    color: blue;
+  margin-bottom: 1rem;
+  color: rgb(0, 0, 0);
 }
 
 label {
-    font-size: larger;
-    color: blue;
+  font-size: larger;
+  color: blue;
 }
 
 input:not([type="submit"]) {
-    padding: 0.6em;
-    margin-bottom: 1rem;
-    margin-top: 1rem;
-    border: 2px solid #0c3b2e;
-    border-radius: 4px;
-    font: inherit;
+  padding: 0.6em;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+  border: 2px solid #0c3b2e;
+  border-radius: 4px;
+  font: inherit;
 }
 
 button {
-    background-color: blue;
-    color: white;
-    font-size: 1.25rem;
-    font-weight: bold;
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-    padding-left: 1em;
-    padding-right: 1em;
-    border-radius: 5px;
-    margin-top: 1em;
+  background-color: blue;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: bold;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-left: 1em;
+  padding-right: 1em;
+  border-radius: 5px;
+  margin-top: 1em;
 }
 
 button:hover {
-    background-color: lightblue;
+  background-color: lightblue;
 }
 
 a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
-#loginMessage, #signupMessage {
-    margin-top: 12px;
-    text-align: center;
+#loginMessage,
+#signupMessage {
+  margin-top: 12px;
+  text-align: center;
 }
