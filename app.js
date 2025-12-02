@@ -234,6 +234,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
+//we should probably hash these passwords but honestly whos hacking this
 app.post("/register", (req, res) => {
   const { username, email, password } = req.body;
   console.log("Register payload:", req.body);
