@@ -237,14 +237,14 @@ app.post("/login", async (req, res) => {
 app.post("/register", (req, res) => {
   const { username, email, password } = req.body;
   console.log("Register payload:", req.body);
-  // Basic validation
+
   if (!username || !email || !password) {
     return res.status(400).json({
       success: false,
       message: "username, email and password are required",
     });
   }
-  // email pattern check
+
   const emailRegex = /.+@.+\..+/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({
@@ -252,25 +252,27 @@ app.post("/register", (req, res) => {
       message: "Please enter a valid email address",
     });
   }
-  // password length check
+
   if (password.length < 8) {
     return res.status(400).json({
       success: false,
       message: "Password must be at least 8 characters",
     });
   }
-  // new user from given data in form
+
   const newUser = new User({
     username,
     email,
     password,
     portfolio: { availableFunds: 1000, stocks: [] },
+    chartData: { labels: [], values: [], lastUpdated: new Date() },
+    watchlist: { stocks: [] },
+    transactions: [],
   });
 
   newUser
     .save()
     .then((savedUser) => {
-      // set session to the saved user info
       req.session.user = {
         username: savedUser.username,
         email: savedUser.email,
@@ -283,14 +285,12 @@ app.post("/register", (req, res) => {
     })
     .catch((err) => {
       console.error("Error in /register:", err);
-      // Duplicate key (unique email) error from Mongo
       if (err && err.code === 11000) {
         return res.status(409).json({
           success: false,
           message: "Email already in use",
         });
       }
-      // Validation errors from mongoose
       if (err && err.name === "ValidationError") {
         const messages = Object.values(err.errors)
           .map((e) => e.message)
